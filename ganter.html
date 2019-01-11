@@ -8,6 +8,481 @@
 <div id="tutorial" style="width:1000px;height: 850px"></div>
 <script type="text/javascript">
 
+
+    var data = [
+        [
+            {
+                planGroup: '总装01-M23',
+                resource: 'PDAJSDQ101',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '83.65'
+            },
+            {
+                planGroup: '总装01-M23',
+                resource: 'PDAJSDQ101',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '99'
+            },
+            {
+                planGroup: '总装01-M23',
+                resource: 'PDAJSDQ101',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '1'
+            },
+            {
+                planGroup: '总装01-M23',
+                resource: 'PDAJSDQ101',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '10'
+            },
+            {
+                planGroup: '总装01-M23',
+                resource: 'PDAJSDQ101',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '87'
+            }
+        ],
+        [
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '78'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '87'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '98'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            }
+        ],
+        [
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '78'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '87'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '98'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            }
+        ],
+        [
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '78'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '87'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '98'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            }
+        ],
+        [
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '78'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '87'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '98'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            }
+        ],
+        [
+            {
+                planGroup: '总装01-M23',
+                resource: 'PDAJSDQ101',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '83.65'
+            },
+            {
+                planGroup: '总装01-M23',
+                resource: 'PDAJSDQ101',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '99'
+            },
+            {
+                planGroup: '总装01-M23',
+                resource: 'PDAJSDQ101',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '1'
+            },
+            {
+                planGroup: '总装01-M23',
+                resource: 'PDAJSDQ101',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '10'
+            },
+            {
+                planGroup: '总装01-M23',
+                resource: 'PDAJSDQ101',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '87'
+            }
+        ],
+        [
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '78'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '87'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '98'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            }
+        ],
+        [
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '78'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '87'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '98'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            }
+        ],
+        [
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '78'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '87'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '98'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            }
+        ],
+        [
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '78'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '87'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '98'
+            },
+            {
+                planGroup: '总装01-M24',
+                resource: 'PDAJSDQ102',
+                date: '2018-12-3',
+                resourceType: 'xx1',
+                resourceAvailableTime: '11',
+                resourceWorkingTime: '13',
+                val: '103.65'
+            }
+        ]
+
+    ];
+
     function mockData(line, column) {
         var d = {data: [], yData: []};
         for (var i = 0; i < line; i++) {
