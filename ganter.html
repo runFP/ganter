@@ -45,11 +45,11 @@
     }
 
 
-    var data2 = mockData(5, 31);
+    var data2 = mockData(5, 81);
 
     var options = {
-        time: '1w', // 参数w为星期,m为月
-        startDate: new Date('2019/01/01'),
+        time: '1t', // 参数1w为1星期,1m为当月1个月,1t为从今天开始算1个月的跨度
+        startDate: new Date(),
         // fullScreen: true, // 是否开启全展示
         yAxis: {
             textStyle: {
@@ -228,7 +228,6 @@
                     d = startDate.getDate();
                     m = startDate.getMonth();
                     y = startDate.getFullYear();
-
                     return getDateArr(d, m, y, bfDate, len, typeStr);
                 } else {
 
@@ -236,7 +235,7 @@
 
                 // 获取天格式
                 function getDateArr(d, m, y, bfDate, len, type) {
-                    var endDay, dd;
+                    var endDay,endDate, dd;
                     var str = '-';
                     var dateArr = [];
                     var weekStr = ['日', '一', '二', '三', '四', '五', '六'];
@@ -279,6 +278,23 @@
                                 m += 1;
                                 if (m > 11) m = 0;
                                 d = 0;
+                                endDay = (new Date(y, m + 1, 0)).getDate();
+                            }
+                        }
+                    } else if (type === 't') {
+                        endDate = new Date(y, m + (len-0), d);
+                        endDay = (new Date(y, m + 1, 0)).getDate();
+                        len = (endDate.setHours(0, 0, 0, 0) - new Date(bfDate).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000);
+                        for (var l = 0; l < len; l++, w++, d++) {
+                            if (w > 6) w = 0;
+                            dd = (m + 1) + str + d;
+                            dateArr.push(dd);
+                            weekArr.push(weekStr[w]);
+                            if (d >= endDay) {
+                                m += 1;
+                                if (m > 11) m = 0;
+                                d = 0;
+                                endDay = (new Date(y, m + 1, 0)).getDate();
                             }
                         }
                     }
