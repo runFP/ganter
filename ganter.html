@@ -48,7 +48,7 @@
     var data2 = mockData(5, 31);
 
     var options = {
-        time: '1m', // 参数w为星期,m为月
+        time: '1w', // 参数w为星期,m为月
         startDate: new Date('2019/01/01'),
         // fullScreen: true, // 是否开启全展示
         yAxis: {
@@ -316,8 +316,6 @@
                 var ty = im.translate.pos.y;
                 var ex = et.x;
                 var ey = et.y;
-                var st = document.documentElement.scrollTop;
-                var sl = document.documentElement.scrollLeft;
                 var x = ex - tx - rl, y = ey - ty - rt;
                 var cellPos = im.cellPos, cells = im.cells;
                 var item;
@@ -432,7 +430,7 @@
                     var yAxis = options.yAxis;
                     var w = this.w = ins.w;
                     var h = this.h = ins.h;
-                    var xWidth, xNums, xGap, yHeight, yNums, yGap;
+                    var xWidth, xNums, xGap, yHeight, yNums, yGap, xCellsWidth, yCellsHeight;
                     this.$XY.setXY({x: date.date.length, y: options.yAxis.data.length});
                     this.el = ins.canvas;
                     this.cells = [];
@@ -465,8 +463,10 @@
                         yAxis.yGap = yGap;
                     }
                     // 边界信息
-                    var xEnd = this.$XY.getXY().x * xAxis.xGap + xAxis.xStart > w ? this.$XY.getXY().x * xAxis.xGap - w + xAxis.xStart : this.$XY.getXY().x * xAxis.xGap + xAxis.xStart;
-                    var yEnd = this.$XY.getXY().y * yAxis.yGap + xAxis.yStart + 12 > h ? this.$XY.getXY().y * yAxis.yGap - h + xAxis.yStart + 12 : this.$XY.getXY().y * yAxis.yGap + xAxis.yStart + 12;
+                    xCellsWidth = this.xCellsWidth = this.$XY.getXY().x * xAxis.xGap + xAxis.xStart;
+                    yCellsHeight = this.yCellsHeight = this.$XY.getXY().y * yAxis.yGap + xAxis.yStart + 12;
+                    var xEnd = xCellsWidth > w ? xCellsWidth - w : xCellsWidth;
+                    var yEnd = yCellsHeight > h ? yCellsHeight - h : yCellsHeight;
                     this.boundaryPos = {
                         x: {
                             start: 0,
@@ -1180,13 +1180,15 @@
                 var x2 = boundaryPos.x.end;
                 var y1 = boundaryPos.y.start;
                 var y2 = boundaryPos.y.end;
+                var xCellsWidth = im.xCellsWidth;
+                var yCellsHeight = im.yCellsHeight;
                 var w = im.w;
                 var h = im.h;
                 if (x > x1) {
                     im.translate.pos.x = x1;
                 } else if (-x > x2) {
                     im.translate.pos.x = -x2 - 1;
-                } else if (x2 < w) {
+                } else if (xCellsWidth < w) {
                     im.translate.pos.x = 0;
                 }
 
@@ -1194,7 +1196,7 @@
                     im.translate.pos.y = y1;
                 } else if (-y > y2) {
                     im.translate.pos.y = -y2 - 1;
-                } else if (y2 < h) {
+                } else if (yCellsHeight < h) {
                     im.translate.pos.y = 0;
                 }
             },
