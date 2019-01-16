@@ -45,17 +45,18 @@
     }
 
 
-    var data2 = mockData(5, 81);
+    var data2 = mockData(35, 40);
 
     var options = {
-        time: '1t', // 参数1w为1星期,1m为当月1个月,1t为从今天开始算1个月的跨度
+        time: '2t', // 参数1w为1星期,1m为当月1个月,1t为从今天开始算1个月的跨度
         startDate: new Date(),
         // fullScreen: true, // 是否开启全展示
         yAxis: {
             textStyle: {
                 color: '#919CA3',
                 fontSize: '12px',
-                textAlign: 'left',
+                textAlign: 'center', // 水平对齐
+                verticalAlign: 'middle', // 垂直对齐
             },
             lineStyle: {
                 color: '#919CA3',
@@ -68,6 +69,8 @@
                 color: '#919CA3',
                 fontSize: '12px',
                 textAlign: 'center',
+                verticalAlign: 'middle', // 垂直对齐
+                // weekDeviation:'14' 周几相对与日期y间距，不传默认14
             },
             lineStyle: {
                 color: '#919CA3',
@@ -235,7 +238,7 @@
 
                 // 获取天格式
                 function getDateArr(d, m, y, bfDate, len, type) {
-                    var endDay,endDate, dd;
+                    var endDay, endDate, dd;
                     var str = '-';
                     var dateArr = [];
                     var weekStr = ['日', '一', '二', '三', '四', '五', '六'];
@@ -282,7 +285,7 @@
                             }
                         }
                     } else if (type === 't') {
-                        endDate = new Date(y, m + (len-0), d);
+                        endDate = new Date(y, m + (len - 0), d);
                         endDay = (new Date(y, m + 1, 0)).getDate();
                         len = (endDate.setHours(0, 0, 0, 0) - new Date(bfDate).setHours(0, 0, 0, 0)) / (24 * 60 * 60 * 1000);
                         for (var l = 0; l < len; l++, w++, d++) {
@@ -359,9 +362,10 @@
                 }
             },
             // 鼠标移开事件
-            mouseOutHandler: function (et, im, tooltip, ins) {
+            mouseOutHandler: function (et, im, tooltip, ins, drag) {
                 tooltip.tooltip.style.display = 'none';
                 im.currentCell = null;
+                drag.status = false;
                 im.cellChange();
             },
             debounce: function (fn, wait, immediately) {
@@ -480,7 +484,7 @@
                     }
                     // 边界信息
                     xCellsWidth = this.xCellsWidth = this.$XY.getXY().x * xAxis.xGap + xAxis.xStart;
-                    yCellsHeight = this.yCellsHeight = this.$XY.getXY().y * yAxis.yGap + xAxis.yStart + 12;
+                    yCellsHeight = this.yCellsHeight = this.$XY.getXY().y * yAxis.yGap + xAxis.xSpace;
                     var xEnd = xCellsWidth > w ? xCellsWidth - w : xCellsWidth;
                     var yEnd = yCellsHeight > h ? yCellsHeight - h : yCellsHeight;
                     this.boundaryPos = {
@@ -525,7 +529,7 @@
                     }());
                     var outFn = (function (et) {
                         return function () {
-                            util.mouseOutHandler(et, me, tooltip, ins);
+                            util.mouseOutHandler(et, me, tooltip, ins, drag);
                         };
                     }());
                     util.addEventListener(this.el, 'mousemove', moveFn);
@@ -619,14 +623,14 @@
 
                     core.$drawLine([{
                         sx: xAxis.xStart,
-                        sy: xAxis.yStart + 12,
+                        sy: xAxis.xSpace,
                         ex: this.$XY.getXY().x * xAxis.xGap + xAxis.xStart,
-                        ey: xAxis.yStart + 12,
+                        ey: xAxis.xStart,
                     }, {
                         sx: xAxis.xStart,
-                        sy: xAxis.yStart + 12,
+                        sy: xAxis.xSpace,
                         ex: yAxis.yEnd,
-                        ey: (this.$XY.getXY().y) * yAxis.yGap + xAxis.yStart + 12,
+                        ey: (this.$XY.getXY().y) * yAxis.yGap + xAxis.xSpace,
                     }]);
                     ins.ctx.restore();
                 },
@@ -640,6 +644,7 @@
                             x: opt.yAxis.xStart,
                             y: opt.yAxis.yStart + i * opt.yAxis.yGap,
                             opt: opt.yAxis,
+                            type: 'y',
                         });
                     }
                     ins.ctx.restore();
@@ -650,11 +655,18 @@
                     var date = this.$getDate();
                     for (var i = 0, ii = date.date.length; i < ii; i++) {
                         core.$drawText({
-                            // text: date.date[i],
-                            text: date.date[i] + ' \n周' + date.week[i],
-                            x: opt.xAxis.xStart + i * opt.xAxis.xGap + Math.floor(opt.xAxis.xGap / 2),
+                            text: date.date[i],
+                            x: opt.xAxis.xStart + i * opt.xAxis.xGap,
                             y: opt.xAxis.yStart,
                             opt: opt.xAxis,
+                            type: 'x',
+                        });
+                        core.$drawText({
+                            text: '周' + date.week[i],
+                            x: opt.xAxis.xStart + i * opt.xAxis.xGap,
+                            y: opt.xAxis.yStart + opt.xAxis.weekDeviation,
+                            opt: opt.xAxis,
+                            type: 'x',
                         });
                     }
                     ins.ctx.restore();
@@ -677,7 +689,7 @@
                             fillStyle = '#fff';
                             pos = {
                                 x: xAxis.xStart + xAxis.xGap * x,
-                                y: xAxis.yStart + 12 + yAxis.yGap * y,
+                                y: xAxis.xSpace + yAxis.yGap * y,
                                 w: xAxis.xGap,
                                 h: yAxis.yGap,
                                 cellStyle: options.cellStyle,
@@ -822,15 +834,18 @@
             setOption: function (option) {
                 var defaultOpt = {
                     xAxis: {
-                        xStart: 100, //y轴所占空间
-                        yStart: 16,
+                        xStart: 100, //y轴所占X空间必须与ySpace相同
+                        yStart: 0,
                         xEnd: this.w,
+                        xSpace: 43,
                         xGap: 70, //X单体所占的距离
+                        weekDeviation: 14, // 周距离日期的偏离位置
                     },
                     yAxis: {
                         xStart: 0,
-                        yStart: 43,
+                        yStart: 43, //x轴所占Y空间必须与xSpace相同
                         yEnd: this.h,
+                        ySpace: 100,
                         yGap: 30, //Y单体所占的距离
                     },
                 };
@@ -899,16 +914,34 @@
              * y: y
              */
             $$drawText: function (option) {
-                var ctx = this.ctx;
+                var ctx = this.ctx, gap;
                 var defaultOptions = {
                     font: '12px 微软雅黑',
                     textAlign: 'center',
+                    textBaseline: "top",
                 };
                 var options = util.extend({}, defaultOptions, option.opt.textStyle);
                 if (options) {
                     if (options.color) ctx.fillStyle = options.color;
                     if (options.font) ctx.font = options.font;
                     if (options.textAlign) ctx.textAlign = options.textAlign;
+                    if (options.textBaseline) ctx.textBaseline = options.textBaseline;
+                    if (ctx.textAlign === 'center') {
+                        if (option.type === 'y') {
+                            option.x = option.x + Math.floor(option.opt.ySpace / 2);
+                        } else if (option.type === 'x') {
+                            option.x = option.x + Math.floor(option.opt.xGap / 2);
+                        }
+                    }
+                    if (options.verticalAlign === 'middle') {
+                        if (option.type === 'y') {
+                            option.y = option.y + Math.floor(option.opt.yGap / 2);
+                            ctx.textBaseline = 'middle';
+                        } else if (option.type === 'x') {
+                            option.y = option.y + Math.floor(option.opt.xSpace / 2) - Math.floor(option.opt.weekDeviation / 2);
+                            ctx.textBaseline = 'middle';
+                        }
+                    }
                 }
                 ctx.fillText(option.text, option.x, option.y);
 
@@ -980,14 +1013,14 @@
                 if (area) {
                     if (area.cell === true) {
                         startX = options.xAxis.xStart - 1;
-                        startY = options.xAxis.yStart + 1;
+                        startY = options.xAxis.xSpace - 1;
                     } else if (area.yAxis === true) {
-                        w = options.xAxis.xStart - 1;
+                        w = options.yAxis.ySpace - 1;
                     } else if (area.xAxis === true) {
-                        h = options.xAxis.yStart + 11;
+                        h = options.xAxis.xSpace - 1;
                     } else if (area.cross === true) {
-                        w = options.xAxis.xStart;
-                        h = options.xAxis.yStart + 11;
+                        w = options.xAxis.xStart - 1;
+                        h = options.xAxis.xSpace - 1;
                     }
                 }
 
@@ -1010,7 +1043,7 @@
             draw: function () {
                 var position = this.position;
                 var val = util.isObject(this.val) ? this.val.val : this.val;
-                var color = this.val.color || '#fff  ';
+                var color = this.val && this.val.color || '#fff  ';
 
                 if (isNaN(val)) {
                     return;
@@ -1136,8 +1169,6 @@
                 this.y1 = et.y;
             },
             mouseMove: function (et, im) {
-            },
-            mouseUp: function (et, im) {
                 if (this.status) {
                     var x1 = this.x1;
                     var y1 = this.y1;
@@ -1145,26 +1176,54 @@
                     var y2 = this.y2 = et.y;
                     var x = Math.abs(x1 - x2);
                     var y = Math.abs(y1 - y2);
-                    if (x > y) {
-                        if (x1 > x2) {
-                            this.direction = 'right';
-                            this.toDrag({x: -x, y: 0}, im, this.direction);
-                        } else if (x1 < x2) {
-                            this.direction = 'left';
-                            this.toDrag({x: x, y: 0}, im, this.direction);
-                        }
-                    } else {
-                        if (y1 < y2) {
-                            this.direction = 'up';
-                            this.toDrag({x: 0, y: y}, im, this.direction);
-                        } else if (y1 > y2) {
-                            this.direction = 'down';
-                            this.toDrag({x: 0, y: -y}, im, this.direction);
-                        }
+                    this.x1 = x2;
+                    this.y1 = y2;
+                    if (x1 > x2) {
+                        this.direction = 'right';
+                        this.toDrag({x: -x, y: 0}, im, this.direction);
+                    } else if (x1 < x2) {
+                        this.direction = 'left';
+                        this.toDrag({x: x, y: 0}, im, this.direction);
                     }
-                    this.status = false;
+                    if (y1 < y2) {
+                        this.direction = 'up';
+                        this.toDrag({x: 0, y: y}, im, this.direction);
+                    } else if (y1 > y2) {
+                        this.direction = 'down';
+                        this.toDrag({x: 0, y: -y}, im, this.direction);
+                    }
                     this.direction = 'none';
                 }
+            },
+            mouseUp: function (et, im) {
+                /*                if (this.status) {
+                                    var x1 = this.x1;
+                                    var y1 = this.y1;
+                                    var x2 = this.x2 = et.x;
+                                    var y2 = this.y2 = et.y;
+                                    var x = Math.abs(x1 - x2);
+                                    var y = Math.abs(y1 - y2);
+                                    if (x > y) {
+                                        if (x1 > x2) {
+                                            this.direction = 'right';
+                                            this.toDrag({x: -x, y: 0}, im, this.direction);
+                                        } else if (x1 < x2) {
+                                            this.direction = 'left';
+                                            this.toDrag({x: x, y: 0}, im, this.direction);
+                                        }
+                                    } else {
+                                        if (y1 < y2) {
+                                            this.direction = 'up';
+                                            this.toDrag({x: 0, y: y}, im, this.direction);
+                                        } else if (y1 > y2) {
+                                            this.direction = 'down';
+                                            this.toDrag({x: 0, y: -y}, im, this.direction);
+                                        }
+                                    }
+                                    this.status = false;
+                                    this.direction = 'none';
+                                }*/
+                this.status = false;
             },
             toDrag: function (distance, im, direction) {
                 var x = distance.x;
@@ -1182,11 +1241,11 @@
                 // 边界校验
                 this.boundaryDetection(im);
                 if (direction === 'right' || direction === 'left') {
+
                     im.$drawMoveXAfter();
                 } else if (direction === 'up' || direction === 'down') {
                     im.$drawMoveYAfter();
                 }
-
             },
             boundaryDetection: function (im) {
                 var x = im.translate.pos.x;
