@@ -116,12 +116,13 @@ var ganter = aGanter(Konva);
 ganter.init({
     container: 'container',
     width: width,
-    height: height
+    height: height,
+    x:.5,
+    y:.5
 });
 ganter.setOption(
     {
         timeRang: '2019/01/21-2019/03/14',
-
         xAxis: {
             x: 100,
             height: 50,
@@ -765,12 +766,12 @@ function aGanter(Konva) {
                     let backgroundGrid = this.parent.find('#backgroundGrid')[0];
                     if (pos.x >= op.x) {
                         backgroundGrid.x(op.x);
-                        return {x: op.x, y: this.getAbsolutePosition().y};
+                        return {x: op.x+.5, y: this.getAbsolutePosition().y};
                     }
 
-                    backgroundGrid.x(pos.x);
+                    backgroundGrid.x(Math.floor(pos.x));
                     return {
-                        x: pos.x,
+                        x: Math.floor(pos.x)+.5,
                         y: this.getAbsolutePosition().y,
                     }
                 }
@@ -860,13 +861,13 @@ function aGanter(Konva) {
                     let backgroundGrid = this.parent.find('#backgroundGrid')[0];
                     if (pos.y >= op.y) {
                         backgroundGrid.y(op.y);
-                        return {x: this.getAbsolutePosition().x, y: op.y};
+                        return {x: this.getAbsolutePosition().x, y: op.y+.5};
                     }
 
-                    backgroundGrid.y(pos.y);
+                    backgroundGrid.y(Math.floor(pos.y));
                     return {
                         x: this.getAbsolutePosition().x,
-                        y: pos.y,
+                        y: Math.floor(pos.y)+.5,
                     }
                 }
             })
