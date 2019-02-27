@@ -2,123 +2,73 @@ import Konva from 'konva';
 
 var width = window.innerWidth;
 var height = window.innerHeight;
+var srollbox = document.querySelector('.srollbox');
 
-
-/*var stage = new Konva.Stage({
-    container: 'container',
-    width: width,
-    height: height
-});*/
-
-/*// draw elemet
-var dragLayer = new Konva.Layer();
-oneThousand();
-stage.add(dragLayer);
-
-function addRectText(group, i) {
-    var rect = new Konva.Rect({
-        y: Math.floor(i / 500) * 100,
-        width: 300,
-        height: 50,
-        fillLinearGradientStartPoint: {x: 0, y: 0},
-        fillLinearGradientEndPoint: {x: 100, y: 50},
-        fillLinearGradientColorStops: [0, 'rgb(59, 92, 248)', 1, 'rgba(59, 92, 248,0.4)'],
-    });
-    var text = new Konva.Text({
-        y: Math.floor(i / 500) * 100,
-        text: 'MO-SCW201902140008-SCW-30-30\n2019-02-20 09:00:00-2019-02-20 19:54:32',
-        fontSize: 12,
-        width: rect.width(),
-        height: rect.height(),
-        padding: 4,
-    });
-
-    group.add(rect)
-    group.add(text)
-}
-
-function oneThousand() {
-
-    for (var i = 0; i < 1000; i++) {
-        var group = new Konva.Group();
-        group.on('mouseover', function () {
-            stage.attrs.container.style.cursor = 'pointer';
-        })
-
-        group.on('mouseout', function () {
-            stage.attrs.container.style.cursor = 'default';
-        })
-
-        if (i % 500 === 0) {
-            if (layer) {
-                stage.add(layer);
-            }
-            var layer = new Konva.Layer();
-        }
-        addRectText(group, i);
-        layer.add(group);
-    }
-    stage.add(layer);
-}
-
-stage.on('mousedown', function (evt) {
-    var target = evt.target;
-    var nodeType = target.nodeType;
-    var beMoveToLayer = dragLayer;
-    var reg = /\d{4}.*$/; //时间替换字符串
-
-    if (nodeType === 'Layer' || nodeType === 'Stage') return;
-    while (nodeType !== 'Group') {
-        target = target.getParent();
-        nodeType = target.nodeType;
-
-    }
-
-    var group = target;
-    var layer = group.getLayer();
-    if (dragLayer.children.length >= 10) {
-        beMoveToLayer = detectLayerChildren(this);
-    }
-
-    var s = group.children[1].text()
-    console.log(s)
-
-    group.moveTo(beMoveToLayer);
-    layer.draw();
-    group.dragBoundFunc(function (pos) {
-        return {
-            x: pos.x,
-            y: this.getAbsolutePosition().y
-        }
-    })
-    group.startDrag();
-
-
-    function detectLayerChildren(node) {
-        if (node.nodeType === 'Stage') {
-            var children = node.children;
-            var miniChildrenLayer = children[0];
-            var childrenNum = children[0].children.length;
-            for (var c = 1, cc = children.length; c < cc; c++) {
-                if (children[c].children.length < childrenNum) {
-                    childrenNum = children[c].children.length;
-                    miniChildrenLayer = children[c];
+function f(n) {
+    let arr = [];
+    for (let i = 0; i < n; i++) {
+        var s = `2019-02-${Math.floor(Math.random() * 10) + 1} 14:00:00`;
+        var e = new Date(new Date(s).getTime() + 1000 * 60 * 60 * 24);
+        let o = {
+            "id": "d924c076f84049bd98b04ce23420d788",
+            "name": "MO-测订单完成010012-SCW-30-30",
+            "from": s,
+            "to": e,
+            "color": "-webkit-linear-gradient(left, rgba(59, 92, 248, 1), rgba(59, 92, 248, 0.4))",
+            "moStatusColor": "-webkit-linear-gradient(left, rgba(59, 92, 248, 1), rgba(59, 92, 248, 0.4))",
+            "moAheadDelayColor": "-webkit-linear-gradient(left, rgba(217, 216, 216, 1), rgba(217, 216, 216, 0.4))",
+            "moKitColor": "-webkit-linear-gradient(left, rgba(170, 19, 19, 1), rgba(170, 19, 19, 0.4))",
+            "resCode": "PCY1CY0003",
+            "progress": {
+                "percent": 0,
+                "color": "#00CD00"
+            },
+            "dependencies": [],
+            "tempDependencies": [
+                {
+                    "to": "abddafc6f4304fd7a308759e2ef50156"
                 }
-            }
-            return miniChildrenLayer;
-        }
+            ],
+            "priority": 0,
+            "movable": true,
+            "taskTooltipsContent": {
+                "MAKE_ORDER_NUM": "MO-测订单完成010012-SCW-30-30",
+                "ITEM_CODE": "12271100002416",
+                "DESCRIPTIONS_CN": "侧板 20BMA50007 SPCC T=0.4mm 喷粉 厨具白",
+                "DEMAND_DATE": "2019-02-25 19:00:00",
+                "MO_QTY": 500,
+                "PROJECT_NUMBER": "测订单完成01.1-1",
+                "STANDARD_FLAG": "Y"
+            },
+            "moResCodePriorities": [
+                {
+                    "Key": "PPF1PF0001",
+                    "Value": "5"
+                },
+                {
+                    "Key": "PCY1CY0003",
+                    "Value": "1"
+                },
+                {
+                    "Key": "PCY1CY0001",
+                    "Value": "1"
+                }
+            ],
+            "visible": true
+        };
+        arr.push(o);
     }
-});*/
+    return arr
+}
 
-//--------------------------------------
-
+var tasks = f(50);
 var ganter = aGanter(Konva);
-ganter.init({
+var stage = ganter.init({
     container: 'container',
     width: width,
     height: height,
-    x:.5,
-    y:.5
+    x: .5,
+    y: .5
 });
 ganter.setOption(
     {
@@ -143,7 +93,6 @@ ganter.setOption(
             }*/
         },
         yAxis: {
-            y: 50,
             cell: {
                 width: 100,
                 height: 50,
@@ -156,21 +105,24 @@ ganter.setOption(
                     align: 'right',
                 },
             },
-            /* customData: [{
-                 drawName: true,
-                 name: '资源',
-                 nameStyle: {
-                     text: {
-                         align: 'center',
-                     }
-                 }
-                 ,
-                 // 自定义yaxis内容的表格绘画内容
-                 /!* formatter:function () {
+            customData: [{
+                drawName: true,
+                name: '资源',
+                nameStyle: {
+                    rect: {
+                        fill: '#ecfdff'
+                    },
+                    text: {
+                        align: 'center',
+                    }
+                }
+                ,
+                // 自定义yaxis内容的表格绘画内容
+                /* formatter:function () {
 
-                  }*!/
-             }],*/
-            // ['资源'],
+                 }*/
+            }],
+            // customData:['资源'],
             data: [
                 {
                     drawName: true,
@@ -187,18 +139,25 @@ ganter.setOption(
                             align: 'left',
                         },
                     },
-                    children: ['PZZ1L001', 'PZZ1LX002']
+                    children: ['PZZ1KX0001', 'PZZ1KX0002']
                 },
                 {
                     drawName: true,
-                    name: '总装01-M23',
-                    nameStyle: {
+                    name: '总装01-M24',
+                    nameStyle: { //组名样式可单独定义，组员的样式由cell定义
+                        /* rect:{
+                          width,
+                          height,
+                          fill,
+                          stroke,
+                          strokeWidth,
+                         },*/
                         text: {
                             align: 'left',
                         },
                     },
-                    children: ['PZZ1L001', 'PZZ1LX002', 'PZZ1LX003', 'PZZ1LX004', 'PZZ1LX005', 'PZZ1LX006'],
-                }
+                    children: ['PZZ1KX0004', 'PZZ1KX0005', 'PZZ1KX0006']
+                },
             ]
             // data:['PZZ1L001', 'PZZ1LX002','PZZ1LX003','PZZ1LX004','PZZ1LX005','PZZ1LX006']//简易模式
         },
@@ -207,144 +166,33 @@ ganter.setOption(
                 {
                     belong: '总装01-M23',
                     name: 'PZZ1KX0001',
-                    tasks: [{
-                        id: '81c55ffb52ea4159adec3efdd50d8bf1',
-                        from: '2019-02-22 08:23:16',
-                        to: '2019-02-22 09:05:46',
-                        name: 'MO-SW133000012',
-                        movable: true,
-                        flag: 'A B C',
-                        visible: true,
-                        color: 'rgba(38, 232, 82, 1),rgba(38, 232, 82, 0.4)',
-                        AColor: 'black',
-                        BColor: 'red',
-                        CColor: 'yellow',
-                        taskTooltipsContent: {
-                            DEMAND_DATE: "2019-03-01 00:00:00",
-                            DESCRIPTIONS_CN: "N 批量整机 MO-200523 65M90E0 RBO-AVATA2-70SS AN-RE 马来西亚 220-240V,1Ph 50/60Hz 216",
-                            ITEM_CODE: "62711-20052301",
-                            MAKE_ORDER_NUM: "MO-SW133000012",
-                            MO_QTY: 50,
-                            PROJECT_NUMBER: "SW13300.1",
-                            STANDARD_FLAG: "Y",
-                        }
-                    }, {
-                        id: '81c55ffb52ea4159adec3efdd50d8bf2',
-                        from: '2019-02-28 20:12:03',
-                        to: '2019-02-28 20:58:48',
-                        name: 'MO-SW133000012',
-                        movable: true,
-                        flag: 'A C',
-                        visible: true,
-                        color: 'rgba(38, 232, 82, 1),rgba(38, 232, 82, 0.4)',
-                        AColor: 'black',
-                        BColor: 'red',
-                        CColor: 'yellow',
-                        taskTooltipsContent: {
-                            DEMAND_DATE: "2019-03-01 00:00:00",
-                            DESCRIPTIONS_CN: "N 批量整机3 MO-200523 65M90E0 RBO-AVATA2-70SS AN-RE 马来西亚 220-240V,1Ph 50/60Hz 216",
-                            ITEM_CODE: "62711-20052301",
-                            MAKE_ORDER_NUM: "MO-SW133000012",
-                            MO_QTY: 50,
-                            PROJECT_NUMBER: "SW13300.1",
-                            STANDARD_FLAG: "Y",
-                        }
-                    }, {
-                        id: '81c55ffb52ea4159adec3efdd50d8bf3',
-                        from: '2019-02-28 21:45:33',
-                        to: '2019-02-28 22:32:19',
-                        name: 'MO-SW133000012',
-                        movable: true,
-                        flag: 'C',
-                        visible: true,
-                        color: 'rgba(38, 232, 82, 1),rgba(38, 232, 82, 0.4)',
-                        AColor: 'black',
-                        BColor: 'red',
-                        CColor: 'yellow',
-                        taskTooltipsContent: {
-                            DEMAND_DATE: "2019-03-01 00:00:00",
-                            DESCRIPTIONS_CN: "N 批量整机2 MO-200523 65M90E0 RBO-AVATA2-70SS AN-RE 马来西亚 220-240V,1Ph 50/60Hz 216",
-                            ITEM_CODE: "62711-20052301",
-                            MAKE_ORDER_NUM: "MO-SW133000012",
-                            MO_QTY: 50,
-                            PROJECT_NUMBER: "SW13300.1",
-                            STANDARD_FLAG: "Y",
-                        }
-                    }]
+                    tasks: tasks,
                 },
                 {
                     belong: '总装01-M23',
                     name: 'PZZ1KX0002',
-                    tasks: [{
-                        id: '81c55ffb52ea4159adec3efdd50d8bf1',
-                        from: '2019-02-22 08:23:16',
-                        to: '2019-02-22 09:05:46',
-                        name: 'MO-SW133000012',
-                        movable: true,
-                        flag: 'A B C',
-                        visible: true,
-                        color: 'rgba(38, 232, 82, 1),rgba(38, 232, 82, 0.4)',
-                        AColor: 'black',
-                        BColor: 'red',
-                        CColor: 'yellow',
-                        taskTooltipsContent: {
-                            DEMAND_DATE: "2019-03-01 00:00:00",
-                            DESCRIPTIONS_CN: "N 批量整机 MO-200523 65M90E0 RBO-AVATA2-70SS AN-RE 马来西亚 220-240V,1Ph 50/60Hz 216",
-                            ITEM_CODE: "62711-20052301",
-                            MAKE_ORDER_NUM: "MO-SW133000012",
-                            MO_QTY: 50,
-                            PROJECT_NUMBER: "SW13300.1",
-                            STANDARD_FLAG: "Y",
-                        }
-                    }, {
-                        id: '81c55ffb52ea4159adec3efdd50d8bf2',
-                        from: '2019-02-28 20:12:03',
-                        to: '2019-02-28 20:58:48',
-                        name: 'MO-SW133000012',
-                        movable: true,
-                        flag: 'A C',
-                        visible: true,
-                        color: 'rgba(38, 232, 82, 1),rgba(38, 232, 82, 0.4)',
-                        AColor: 'black',
-                        BColor: 'red',
-                        CColor: 'yellow',
-                        taskTooltipsContent: {
-                            DEMAND_DATE: "2019-03-01 00:00:00",
-                            DESCRIPTIONS_CN: "N 批量整机3 MO-200523 65M90E0 RBO-AVATA2-70SS AN-RE 马来西亚 220-240V,1Ph 50/60Hz 216",
-                            ITEM_CODE: "62711-20052301",
-                            MAKE_ORDER_NUM: "MO-SW133000012",
-                            MO_QTY: 50,
-                            PROJECT_NUMBER: "SW13300.1",
-                            STANDARD_FLAG: "Y",
-                        }
-                    }, {
-                        id: '81c55ffb52ea4159adec3efdd50d8bf3',
-                        from: '2019-02-28 21:45:33',
-                        to: '2019-02-28 22:32:19',
-                        name: 'MO-SW133000012',
-                        movable: true,
-                        flag: 'C',
-                        visible: true,
-                        color: 'rgba(38, 232, 82, 1),rgba(38, 232, 82, 0.4)',
-                        AColor: 'black',
-                        BColor: 'red',
-                        CColor: 'yellow',
-                        taskTooltipsContent: {
-                            DEMAND_DATE: "2019-03-01 00:00:00",
-                            DESCRIPTIONS_CN: "N 批量整机2 MO-200523 65M90E0 RBO-AVATA2-70SS AN-RE 马来西亚 220-240V,1Ph 50/60Hz 216",
-                            ITEM_CODE: "62711-20052301",
-                            MAKE_ORDER_NUM: "MO-SW133000012",
-                            MO_QTY: 50,
-                            PROJECT_NUMBER: "SW13300.1",
-                            STANDARD_FLAG: "Y",
-                        }
-                    }]
-                },
+                    tasks: tasks,
+                }
             ]
     }
 )
 ;
 ganter.draw();
+
+srollbox.addEventListener('scroll', function () {
+    var dx = srollbox.scrollLeft;
+    var dy = srollbox.scrollTop;
+    console.log(dx, dy);
+    var xaxis = stage.find('#xaxis');
+    xaxis.y(dy);
+    var background = stage.find('#background');
+    background.draw();
+    // xaxis.draw();
+    /*stage.container().style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+    stage.x(-dx);
+    stage.y(-dy);
+    stage.batchDraw();*/
+})
 
 function aGanter(Konva) {
     var toString = Object.prototype.toString;
@@ -622,6 +470,33 @@ function aGanter(Konva) {
             }
 
         })(),
+        getX: {
+            start: 0,
+            dayMin: 1440,
+            baseXFromMin: 0,
+            setStart: function (s) {
+                this.start = new Date(s).getTime();
+            },
+            setbaseXFromMin: function (w) {
+                this.baseXFromMin = w / this.dayMin;
+            },
+            fromTime: function (time) {
+                return +this.getWidth(this.start, time);
+            },
+            getWidth: function (startDate, endData) {
+                return +(((new Date(endData).getTime() - new Date(startDate).getTime()) / 60 / 1000) * this.baseXFromMin).toFixed(2);
+            }
+        },
+        //Y轴生产线映射
+        yMap: {
+            pool: {},
+            setPool: function (name, val) {
+                this.pool[name] = val;
+            },
+            getY: function (name) {
+                return this.pool[name] || false;
+            }
+        },
         /**
          * 时间间隔宽度计算
          * @param layerWidth 层级宽
@@ -694,6 +569,7 @@ function aGanter(Konva) {
         init(params) {
             this.stage = new Konva.Stage(params);
             store.set('stage', this.stage);
+            return this.stage;
         }
 
         setOption(option) {
@@ -713,15 +589,23 @@ function aGanter(Konva) {
             store.set('options', options);
 
             this.background = new Background('background');
+            this.workorder = new WorkOrder(options.series);
         }
 
         draw() {
             let background = this.background;
+            let workorder = this.workorder;
             let stage = this.stage;
             background.draw();
-            stage.add(background.layer)
+            workorder.draw();
+            stage.add(background.layer);
+            stage.add(...workorder.layers);
+            //重新设置舞台宽高
+            let xaxis = store.get('xaxis');
+            let yaxis = store.get('yaxis');
+            stage.width(xaxis.dealt.totalWidth + xaxis.options.x + 2);
+            stage.height(yaxis.dealt.totalHeight + yaxis.options.y + 2)
         }
-
 
     }
 
@@ -732,7 +616,6 @@ function aGanter(Konva) {
             this.xaxis = new Xaxis('xaxis');
             this.yaxis = new Yaxis('yaxis');
             this.backgroundGrid = new BackgroundGrid({id: 'backgroundGrid', x: 100, y: 50});
-
         }
 
         draw() {
@@ -761,20 +644,6 @@ function aGanter(Konva) {
                 id,
                 x: op.x,
                 y: op.y,
-                draggable: true,
-                dragBoundFunc(pos) {
-                    let backgroundGrid = this.parent.find('#backgroundGrid')[0];
-                    if (pos.x >= op.x) {
-                        backgroundGrid.x(op.x);
-                        return {x: op.x+.5, y: this.getAbsolutePosition().y};
-                    }
-
-                    backgroundGrid.x(Math.floor(pos.x));
-                    return {
-                        x: Math.floor(pos.x)+.5,
-                        y: this.getAbsolutePosition().y,
-                    }
-                }
             });
             store.set('xaxis', {options: op, dealt: this.dealt}); //将xaxis配置参数和处理过的参数存起来
 
@@ -791,7 +660,11 @@ function aGanter(Konva) {
                 let timeNum = timeFormat.slice(0, -1);
                 let timeType = timeFormat.slice(-1);
                 let stageWidth = store.get('stage').width();
-                let xCellWidth = Math.floor(stageWidth / timeNum);
+                let yaxisWidth = store.get('options').yAxis.cell.width;
+                let xCellWidth = Math.floor((stageWidth - yaxisWidth) / timeNum);
+                // 设置开始时间和基础X/分钟
+                util.getX.setStart(startDate);
+                util.getX.setbaseXFromMin(xCellWidth);
 
                 return {
                     dates,
@@ -851,57 +724,82 @@ function aGanter(Konva) {
             if (yw > xx) {
                 op.y = xop.height;
             }
-
+            let dealtData;
             this.group = new Konva.Group({
                 id,
                 x: op.x,
                 y: op.y,
-                draggable: true,
-                dragBoundFunc(pos) {
-                    let backgroundGrid = this.parent.find('#backgroundGrid')[0];
-                    if (pos.y >= op.y) {
-                        backgroundGrid.y(op.y);
-                        return {x: this.getAbsolutePosition().x, y: op.y+.5};
-                    }
-
-                    backgroundGrid.y(Math.floor(pos.y));
-                    return {
-                        x: this.getAbsolutePosition().x,
-                        y: Math.floor(pos.y)+.5,
-                    }
-                }
-            })
+            });
             store.set('yaxis', {options: op});
+
+            this.dealtData = dealtData = this.dealWithData(op);
+            store.set('yaxis', {dealt: dealtData});
         }
 
         draw() {
-            let op = store.get('options').yAxis;
-            let data = op.data;
-            let nameGroupHeight = 0;
-            let totalCells = 0
-            if (op.customData) {
-                for (let i = 0, ii = op.customData.length; i < ii; i++) {
-                    let yCell = new YaxisCell(`ycuscell${i}`, 'yaxis', i, nameGroupHeight, op.customData[i], totalCells);
-                    nameGroupHeight = yCell.nameGroupHeight
-                    totalCells = yCell.totalCells;
-                    this.group.add(yCell.group);
+            let dealtCellData = this.dealtData.dealtCellData;
+            dealtCellData.forEach(cellInf => {
+                let ycell = new YaxisCell(cellInf);
+                this.group.add(ycell.group);
+            })
+        }
+
+        dealWithData(originData) {
+            let dealtCellData = [];
+            let totalHeight = 0;
+            let cellStyle = originData.cell;
+            let options = util.extend(true, {}, YaxisCell.defaultOp, cellStyle);
+
+            if (originData.customData) {
+                warpData(originData.customData, dealtCellData, originData);
+            }
+            warpData(originData.data, dealtCellData, originData);
+
+            function warpData(data, storeArr, originData) {
+                data.forEach(ycelldata => {
+                    if (util.isObject(ycelldata)) {
+                        if (ycelldata.drawName) {
+                            let options = util.extend(true, {}, YaxisCell.defaultOp, cellStyle, ycelldata.nameStyle);
+                            totalHeight = warpCell(ycelldata.name, storeArr, totalHeight, options, originData);
+                        }
+                        if (ycelldata.children) {
+                            ycelldata.children.forEach(cd => {
+                                totalHeight = warpCell(cd, storeArr, totalHeight, options, originData);
+                            })
+                        }
+                    } else {
+                        totalHeight = warpCell(ycelldata, storeArr, totalHeight, options, originData);
+                    }
+                });
+
+                function warpCell(name, storeArr, totalHeight, options, originData) {
+                    let width = options.width, height = options.height, rect = options.rect, text = options.text;
+                    let d = {
+                        id: name,
+                        name: 'Ycell',
+                        x: originData.x,
+                        y: totalHeight,
+                        width,
+                        height,
+                        text: name,
+                        style: {rect, text},
+                    };
+                    util.yMap.setPool(name, totalHeight); //ymap映射
+                    totalHeight += height;
+                    storeArr.push(d);
+
+                    return totalHeight;
                 }
             }
 
-            for (let i = 0, ii = data.length; i < ii; i++) {
-                let yCell = new YaxisCell(`ycell${i}`, 'yaxis', i, nameGroupHeight, null, totalCells);
-                nameGroupHeight = yCell.nameGroupHeight;
-                totalCells = yCell.totalCells;
-                this.group.add(yCell.group);
-            }
-            store.set('yaxis', {dealt: {totalHeight: nameGroupHeight, totalCells: totalCells}});
+            return {dealtCellData, totalHeight, totalCells: dealtCellData.length};
         }
     }
 
     // CELL Class
     class Cell {
-        constructor(id, name) {
-            this.group = new Konva.Group({id, name});
+        constructor(id, name, x, y) {
+            this.group = new Konva.Group({id, name, x, y});
         }
 
         draw() {
@@ -909,29 +807,30 @@ function aGanter(Konva) {
     }
 
     class AxisCell extends Cell {
-        constructor(id, name) {
-            super(id, name);
-            this.defaultOp = {
-                rect: {
-                    fill: '#fff',
-                    stroke: 'transparent',
-                    strokeWidth: 0,
-                },
-                text: {
-                    fill: '#000',
-                    align: 'left',
-                    verticalAlign: 'middle',
-                    fontSize: 14,
-                    warp: 'none',
-                    lineHeight: 1,
-                }
-            };
+        static defaultOp = {
+            rect: {
+                fill: '#fff',
+                stroke: 'transparent',
+                strokeWidth: 0,
+            },
+            text: {
+                fill: '#000',
+                align: 'left',
+                verticalAlign: 'middle',
+                fontSize: 12,
+                warp: 'none',
+                lineHeight: 1,
+            }
+        };
+
+        constructor(id, name, x, y) {
+            super(id, name, x, y);
         }
     }
 
     class XaxisCell extends AxisCell {
         constructor(id, name, w, h, i, cusAllWidth) {
-            super(id, name, w, h);
+            super(id, name);
             this.draw(w, h, i, this.group, cusAllWidth);
         }
 
@@ -960,7 +859,7 @@ function aGanter(Konva) {
                     lineHeight: 1.2,
                     align: 'center',
                     verticalAlign: 'middle',
-                    fontSize: 14,
+                    fontSize: 12,
                     wrap: 'none',
                 });
                 group.add(rect);
@@ -1003,7 +902,7 @@ function aGanter(Konva) {
                     lineHeight: 1.2,
                     align: 'center',
                     verticalAlign: 'middle',
-                    fontSize: 14,
+                    fontSize: 12,
                     wrap: 'none',
                 });
                 group.add(rect);
@@ -1014,89 +913,52 @@ function aGanter(Konva) {
     }
 
     class YaxisCell extends AxisCell {
-        constructor(id, name, i, nameGroupHeight, cd, totalCells) {
-            super(id, name);
-            this.nameGroupHeight = 0;
-            this.draw(i, this.group, nameGroupHeight, cd, totalCells);
-            return this.nameGroupHeight;
+        constructor(inf) {
+            super(inf.id, inf.name, inf.x, inf.y);
+            this.draw(inf);
         }
 
-        draw(i, group, nameGroupHeight, cd, totalCells) {
-            let yAxisOp = store.get('yaxis');
-            let op = yAxisOp.options;
-            let options = util.extend(true, {}, this.defaultOp, op.cell);
-            let width = options.width, height = options.height;
-            cd = cd || op.data[i];
-            // Y轴是否存在分组
-            if (util.isObject(cd)) {
-                if (cd.drawName) { // 是否需要绘制组名
-                    let options = util.extend(true, {}, this.defaultOp, op.cell, cd.nameStyle);
-                    let width = options.width, height = options.height;
-                    let rect = new Konva.Rect({
-                        width,
-                        height,
-                        ...options.rect,
-                        y: nameGroupHeight,
-                    });
-                    let text = new Konva.Text({
-                        width,
-                        height,
-                        ...options.text,
-                        text: cd.name,
-                        y: nameGroupHeight,
-                    });
-                    this.nameGroupHeight = nameGroupHeight + height;
-                    group.add(rect);
-                    group.add(text);
-                    totalCells += 1;
-                    this.totalCells = totalCells;
-                }
-                if (cd.children) {//绘制组员
-                    if (this.nameGroupHeight !== 0) {
-                        nameGroupHeight = this.nameGroupHeight;
-                    }
-                    //drawChildren
-                    for (let i = 0, ii = cd.children.length; i < ii; i++) {
-                        let rect = new Konva.Rect({
-                            width,
-                            height,
-                            ...options.rect,
-                            y: nameGroupHeight + i * height,
-                        });
-                        let text = new Konva.Text({
-                            width,
-                            height,
-                            ...options.text,
-                            y: nameGroupHeight + i * height,
-                            text: cd.children[i],
-                        });
-                        group.add(rect);
-                        group.add(text);
-                        totalCells += 1;
-                    }
-                    this.nameGroupHeight = nameGroupHeight + cd.children.length * height;
-                    this.totalCells = totalCells;
-                }
-            } else {
-                let rect = new Konva.Rect({
-                    width,
-                    height,
-                    ...options.rect,
-                    y: i * height,
-                });
-                let text = new Konva.Text({
-                    width,
-                    height,
-                    ...options.text,
-                    y: i * height,
-                    text: cd,
-                });
-                group.add(rect);
-                group.add(text);
-                totalCells += 1;
-                this.nameGroupHeight = nameGroupHeight + height;
-                this.totalCells = totalCells;
+        draw(inf) {
+            let group = this.group;
+            let rect = new Konva.Rect({
+                width: inf.width,
+                height: inf.height,
+                ...inf.style.rect,
+            });
+            let text = new Konva.Text({
+                width: inf.width,
+                height: inf.height,
+                text: inf.text,
+                ...inf.style.text,
+            });
+            group.add(rect);
+            group.add(text);
+        }
+    }
+
+    class WorkCell extends Cell {
+        static defaultOp = {
+            rect: {
+                fill: '#fff',
+                stroke: 'transparent',
+                strokeWidth: 0,
+            },
+            text: {
+                fill: '#000',
+                align: 'left',
+                verticalAlign: 'middle',
+                fontSize: 12,
+                warp: 'none',
+                lineHeight: 1,
             }
+        };
+
+        constructor(id, name, data) {
+            super(id, name);
+            this.draw();
+        }
+
+        draw() {
         }
     }
 
@@ -1139,6 +1001,99 @@ function aGanter(Konva) {
                 this.group.add(line);
             }
         }
+
+    }
+
+    // 工单类
+    class WorkOrder {
+        constructor(data) {
+            this.layers = [];
+            this.dealtData = this.dealWithData(data);
+            console.log(this.dealtData)
+        }
+
+        draw() {
+            let dealtData = this.dealtData;
+            let layer = null;
+            let options = store.get('options');
+            dealtData.forEach((w, i) => {
+                if (i % 500 === 0) {
+                    if (layer) {
+                        this.layers.push(layer);
+                    }
+                    layer = new Konva.Layer({
+                        name: 'workorder',
+                        x: 300,
+                        x: options.xAxis.x,
+                        y: options.yAxis.y,
+                        stroke: 'red',
+                    });
+                }
+                drawWO(w, layer);
+            });
+            this.layers.push(layer);
+
+            function drawWO(inf, layer) {
+                let id = inf.id, name = inf.name, x = +inf.x, y = +inf.y, height = inf.height, width = inf.width;
+                let group = new Konva.Group({
+                    id,
+                    name,
+                    x,
+                    y,
+                    height,
+                    width,
+                    draggable: true,
+                    dragBoundFunc: function (pos) {
+                        return {
+                            x: pos.x,
+                            y: this.getAbsolutePosition().y
+                        };
+                    }
+                });
+                let rect = new Konva.Rect({
+                    height,
+                    width,
+                    fillLinearGradientStartPoint: {x: 0, y: 0},
+                    fillLinearGradientEndPoint: {x: width, y: 0},
+                    fillLinearGradientColorStops: [0, 'rgb(59, 92, 248)', 1, 'rgba(59, 92, 248,0.4)'],
+                });
+                let text = new Konva.Text({
+                    height,
+                    width,
+                    text: inf.originData.name,
+
+                });
+                group.add(rect);
+                group.add(text);
+                layer.add(group);
+            }
+        }
+
+        dealWithData(originData) {
+            let getx = util.getX;
+            let yaxis = store.get('yaxis').options;
+            let dealtWOData = [];
+            originData.forEach(order => {
+                let tasks = order.tasks;
+                let y = util.yMap.getY(order.name);
+                let belong = order.belong;
+                tasks.forEach(task => {
+                    let handbill = {
+                        id: task.id,
+                        name: `${task.flag} ${belong}`,
+                        y: y,
+                        x: getx.fromTime(task.from),
+                        width: getx.getWidth(task.from, task.to),
+                        height: yaxis.cell.height,
+                        originData: task,
+                    };
+                    dealtWOData.push(handbill);
+                })
+            });
+
+            return dealtWOData;
+        }
+
 
     }
 
