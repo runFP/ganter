@@ -1,8 +1,13 @@
 import Konva from 'konva';
 
-var width = window.innerWidth;
-var height = window.innerHeight;
 var srollbox = document.querySelector('.srollbox');
+var d1 = document.querySelector('#d1');
+var d3 = document.querySelector('#d3');
+var d7 = document.querySelector('#d7');
+var d14 = document.querySelector('#d14');
+var d30 = document.querySelector('#d30');
+var width = srollbox.offsetWidth;
+var height = srollbox.offsetHeight;
 
 function f(n) {
     let arr = [];
@@ -69,23 +74,38 @@ var stage = ganter.init({
     height: height,
     x: .5,
     y: .5
-});
+}, '.srollbox', {lazyLoad: true});
 ganter.setOption(
     {
         timeRang: '2019/01/21-2019/03/14',
+        timeFormat: '30d',
+        diagonal: {
+            style: {
+                rect: {stroke: '#000', strokeWidth: 1},
+            }
+        },
         xAxis: {
             x: 100,
+            cell: {
+                height: 50, // 宽根据时间格式自动生成
+                rect: {fill: '#c6c6c6', stroke: '#000'},
+                text: {align: 'center'},
+            },
             height: 50,
-            /*customXaxis: [{
-                text: '工单',
-                width: 100, //表格宽,默认为表格平均
-                // 自定义xaxisn内容的表格绘画内容
-                /!* formatter:function () {
+            /*  customData: [{
+                  name: '工单',
+                  width: 100, //表格宽,默认为表格平均
+                  style: {
+                      rect: {},
+                      text: {},
+                  },
 
-                 }*!/
-            }/!*, {
-                    text: '工单',
-            }*!/]*/
+                  // 自定义xaxisn内容的表格绘画内容
+                  /!* formatter:function () {
+
+                   }*!/
+              }],*/
+            // customData:['工单'],
             // 自定义xaxis的表格绘画内容
             // RECT类 TEXT类 xAxis组 相关信息 xaxis的位置
             /*formatter: function (rect, text, group, dealt, i) {
@@ -93,6 +113,7 @@ ganter.setOption(
             }*/
         },
         yAxis: {
+            y: 50,
             cell: {
                 width: 100,
                 height: 50,
@@ -105,29 +126,28 @@ ganter.setOption(
                     align: 'right',
                 },
             },
-            customData: [{
-                drawName: true,
-                name: '资源',
-                nameStyle: {
-                    rect: {
-                        fill: '#ecfdff'
-                    },
-                    text: {
-                        align: 'center',
-                    }
-                }
-                ,
-                // 自定义yaxis内容的表格绘画内容
-                /* formatter:function () {
+            /*            customData: [{
+                            drawName: true,
+                            name: '资源',
+                            style: {
+                                rect: {
+                                    fill: '#ecfdff'
+                                },
+                                text: {
+                                    align: 'center',
+                                }
+                            },
+                            // 自定义yaxis内容的表格绘画内容
+                            /!* formatter:function () {
 
-                 }*/
-            }],
+                             }*!/
+                        }],*/
             // customData:['资源'],
             data: [
                 {
                     drawName: true,
                     name: '总装01-M23',
-                    nameStyle: { //组名样式可单独定义，组员的样式由cell定义
+                    style: { //组名样式可单独定义，组员的样式由cell定义
                         /* rect:{
                           width,
                           height,
@@ -144,7 +164,7 @@ ganter.setOption(
                 {
                     drawName: true,
                     name: '总装01-M24',
-                    nameStyle: { //组名样式可单独定义，组员的样式由cell定义
+                    style: { //组名样式可单独定义，组员的样式由cell定义
                         /* rect:{
                           width,
                           height,
@@ -172,27 +192,47 @@ ganter.setOption(
                     belong: '总装01-M23',
                     name: 'PZZ1KX0002',
                     tasks: tasks,
+                },
+                {
+                    belong: '总装01-M24',
+                    name: 'PZZ1KX0006',
+                    tasks: tasks,
                 }
             ]
     }
-)
-;
-ganter.draw();
+);
+ganter.render();
 
-srollbox.addEventListener('scroll', function () {
-    var dx = srollbox.scrollLeft;
-    var dy = srollbox.scrollTop;
-    console.log(dx, dy);
-    var xaxis = stage.find('#xaxis');
+/*srollbox.addEventListener('scroll', function () {
+    let dx = srollbox.scrollLeft;
+    let dy = srollbox.scrollTop;
+    let xaxis = stage.find('#xaxis');
+    let yaxis = stage.find('#yaxis');
+    let diagonal = stage.find('#diagonal');
+    let background = stage.find('#background');
     xaxis.y(dy);
-    var background = stage.find('#background');
+    diagonal.y(dy);
+    yaxis.x(dx);
+    diagonal.x(dx);
     background.draw();
-    // xaxis.draw();
-    /*stage.container().style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
-    stage.x(-dx);
-    stage.y(-dy);
-    stage.batchDraw();*/
+});*/
+
+d14.addEventListener('click', function () {
+    ganter.setTimeFormat('14d');
 })
+d30.addEventListener('click', function () {
+    ganter.setTimeFormat('30d');
+})
+d7.addEventListener('click', function () {
+    ganter.setTimeFormat('7d');
+})
+d3.addEventListener('click', function () {
+    ganter.setTimeFormat('3d');
+})
+d1.addEventListener('click', function () {
+    ganter.setTimeFormat('1d');
+})
+
 
 function aGanter(Konva) {
     var toString = Object.prototype.toString;
@@ -260,6 +300,15 @@ function aGanter(Konva) {
             } else {
                 return Object.assign.apply(null, args);
             }
+        },
+        createDom: function (params) {
+            let dom = document.createElement('div');
+            dom.style.cssText = [
+                `width:${params.width}px`,
+                'height:1px',
+                'backgound-color:transparent',
+            ].join(';') + ';';
+            return dom;
         },
         /**
          * 获取X轴时间
@@ -394,9 +443,6 @@ function aGanter(Konva) {
 
             }
 
-        },
-        addEventListener: function (el, event, handler) {
-            el.addEventListener(event, handler);
         },
         debounce: function (fn, wait, immediately) {
             var timeID;
@@ -560,53 +606,114 @@ function aGanter(Konva) {
 
     // AGanter Class
     class AGanter {
+        static defaultOption = {
+            xAxis: {
+                x: 0, // 起始位置
+                y: 0, // 起始位置
+            },
+            yAxis: {
+                x: 0,
+                y: 0,
+            }
+        };
+
         constructor() {
             this.stage = null;
             this.background = null;
         }
 
         //
-        init(params) {
+        init(params, scrollId, options) {
             this.stage = new Konva.Stage(params);
-            store.set('stage', this.stage);
+            this.scrollDiv = document.querySelector(scrollId);
+            store.set('wh', {width: params.width, height: params.height});
+            store.set('stage', {stage: this.stage, options});
             return this.stage;
         }
 
         setOption(option) {
             // 默认配置
-            const defaultOption = {
-                xAxis: {
-                    x: 0, // 起始位置
-                    y: 0, // 起始位置
-                },
-                yAxis: {
-                    x: 0,
-                    y: 0,
-                }
-            };
-
-            let options = util.extend(true, {}, defaultOption, option);
+            let options = util.extend(true, {}, AGanter.defaultOption, option);
             store.set('options', options);
+        }
 
-            this.background = new Background('background');
-            this.workorder = new WorkOrder(options.series);
+        render() {
+            this.draw();
+            this.resetStageWH();
+            this.bindEvent();
         }
 
         draw() {
-            let background = this.background;
-            let workorder = this.workorder;
+            store.clear('xaxis');
+            store.clear('yaxis');
+            let options = store.get('options', options);
+            let backgroundGrid = this.backgroundGrid = new BackgroundGrid({
+                id: 'backgroundGrid',
+                x: options.xAxis.x,
+                y: options.yAxis.y
+            });
+            let background = this.background = new Background('background');
+            let workorder = this.workorder = new WorkOrder(options.series);
             let stage = this.stage;
+
+            // 开始绘画
             background.draw();
+            backgroundGrid.draw(); // 依赖于x,y轴必须放于之后
             workorder.draw();
-            stage.add(background.layer);
+
+            // 添加入舞台
+            stage.add(backgroundGrid.layer);
             stage.add(...workorder.layers);
-            //重新设置舞台宽高
-            let xaxis = store.get('xaxis');
-            let yaxis = store.get('yaxis');
-            stage.width(xaxis.dealt.totalWidth + xaxis.options.x + 2);
-            stage.height(yaxis.dealt.totalHeight + yaxis.options.y + 2)
+            stage.add(background.layer);
+            this.resetStageWH();
         }
 
+        setTimeFormat(timeFormat) {
+            let stage = this.stage;
+            stage.clearCache();
+            stage.destroyChildren();
+            store.set('options', {timeFormat: timeFormat});
+            this.draw();
+        }
+
+        bindEvent() {
+            let scrollDiv = this.scrollDiv;
+            scrollDiv.addEventListener('scroll', function () {
+                let dx = this.scrollLeft;
+                let dy = this.scrollTop;
+                /*                let xaxis = stage.find('#xaxis');
+                                let yaxis = stage.find('#yaxis');
+                                let diagonal = stage.find('#diagonal');
+                                let background = stage.find('#background');
+                                xaxis.y(dy);
+                                diagonal.y(dy);
+                                yaxis.x(dx);
+                                diagonal.x(dx);
+                                background.draw();*/
+            });
+        }
+
+
+        //重新设置舞台宽高
+        resetStageWH() {
+            let scrollDiv = this.scrollDiv;
+            let xaxis = store.get('xaxis');
+            let totalWidth = xaxis.dealt.totalWidth;
+            let xaxisX = xaxis.options.x;
+            let fakeDom = this.fakeDom;
+            if (!fakeDom) {
+                this.fakeDom = fakeDom = util.createDom({width: totalWidth + xaxisX + 2});
+                scrollDiv.appendChild(fakeDom);
+            } else {
+                fakeDom.style.width = `${totalWidth + xaxisX + 2}px`;
+            }
+
+
+            let stage = this.stage;
+            let yaxis = store.get('yaxis');
+            stage.width(xaxis.dealt.totalWidth + xaxis.options.x + 2);
+            stage.height(yaxis.dealt.totalHeight + yaxis.options.y + 2);
+        }
     }
 
     // BACKGROUND Class
@@ -615,16 +722,57 @@ function aGanter(Konva) {
             this.layer = new Konva.Layer({id});
             this.xaxis = new Xaxis('xaxis');
             this.yaxis = new Yaxis('yaxis');
-            this.backgroundGrid = new BackgroundGrid({id: 'backgroundGrid', x: 100, y: 50});
+            this.diagonal = new Diagonal('diagonal');
         }
 
         draw() {
             this.xaxis.draw();
             this.yaxis.draw();
-            this.backgroundGrid.draw();
-            this.layer.add(this.backgroundGrid.group);
+            this.diagonal.draw();
             this.layer.add(this.xaxis.group);
             this.layer.add(this.yaxis.group);
+            this.layer.add(this.diagonal.group);
+        }
+    }
+
+    //Diagonal
+    class Diagonal {
+        static defaultOption = {
+            rect: {
+                fill: '#ecfdff',
+                stroke: 'transparent',
+            },
+            line: {
+                stroke: '#000',
+                strokeWidth: .5,
+            }
+        };
+
+        constructor(id) {
+            this.group = new Konva.Group({id});
+        }
+
+        draw() {
+            let group = this.group;
+            let xaxis = store.get('xaxis');
+            let yaxis = store.get('yaxis');
+            let diagonal = store.get('options').diagonal;
+            let width = xaxis.options.x;
+            let height = yaxis.options.y;
+            if (!width || !height) return;
+            let options = util.extend(true, {}, Diagonal.defaultOption, diagonal.style);
+            let rect = new Konva.Rect({
+                width,
+                height,
+                ...options.rect,
+            });
+            let line = new Konva.Line({
+                points: [0, 0, width, height],
+                ...options.line,
+            });
+
+            group.add(rect);
+            group.add(line);
         }
     }
 
@@ -638,77 +786,110 @@ function aGanter(Konva) {
         constructor(id) {
             super();
             let op = store.get('options').xAxis;
-            this.dealt = processOption();
-            this.totalCells = 0; // 包含元素总数
+            let dealtData;
             this.group = new Konva.Group({
                 id,
                 x: op.x,
                 y: op.y,
             });
-            store.set('xaxis', {options: op, dealt: this.dealt}); //将xaxis配置参数和处理过的参数存起来
+            store.set('xaxis', {options: op});
 
-            // 处理参数，加成出必要数据
-            function processOption() {
-                // 拿日期
-                let timeRang = store.get('options').timeRang.split('-');
-                let startDate = new Date(timeRang[0]);
-                let endDate = new Date(timeRang[1]);
-                let dates = util.calculateDate(startDate, endDate, 'day');
-
-                // 计算xAxis cellwidth
-                let timeFormat = '30d';
-                let timeNum = timeFormat.slice(0, -1);
-                let timeType = timeFormat.slice(-1);
-                let stageWidth = store.get('stage').width();
-                let yaxisWidth = store.get('options').yAxis.cell.width;
-                let xCellWidth = Math.floor((stageWidth - yaxisWidth) / timeNum);
-                // 设置开始时间和基础X/分钟
-                util.getX.setStart(startDate);
-                util.getX.setbaseXFromMin(xCellWidth);
-
-                return {
-                    dates,
-                    timeNum,
-                    timeType,
-                    xCellWidth,
-                }
-            }
+            this.dealtData = dealtData = this.dealWithData(op);
+            store.set('xaxis', {dealt: dealtData});
         }
 
         draw() {
-            let dealt = this.dealt;
-            let op = store.get('options').xAxis;
-            let dates = dealt.dates;
-            let date = dates.date;
-            let xCellWidth = dealt.xCellWidth;
-            let cusAllWidth = 0;
+            let dealtCellData = this.dealtData.dealtCellData;
+            dealtCellData.forEach(cellInf => {
+                let xcell = new XaxisCell(cellInf);
+                this.group.add(xcell.group);
+            })
+        }
 
+        dealWithData(originData) {
+            let dealtCellData = [];
+            let totalWidth = 0;
+            let customAllWidth = 0;
+            let cellStyle = originData.cell;
+            let dates = this.getDate();
+            let timeFormatInf = this.getTimeFormatInf();
+            let cellWidth = this.calculateCellWidth(timeFormatInf);
+            let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle);
+            let isLazyLoad = store.get('stage').options.lazyLoad; //判断是否懒加载模式
 
-            //先绘制自定义x轴内容
-            if (op.customXaxis) {
-                let customXaxis = op.customXaxis;
-                customXaxis.map((x, i) => {
-                    let width = x.width || xCellWidth;
-                    cusAllWidth += width;
-                    x.x = i === 0 ? op.x : (customXaxis[i - 1].width || xCellWidth);
-                    let xCell = new XaxisCusCell(`${x.text}`, 'xaxis', width, op.height, x, i, cusAllWidth);
-                    this.group.add(xCell.group);
+            // 获取当前scrollx
+
+            // 判断当前xcell位置和起始/结束的xcell元素位置
+
+            //设置xaxis的x值
+
+                debugger
+            if (originData.customData) {
+                warpData(originData.customData, dealtCellData, originData);
+                customAllWidth = totalWidth;
+            }
+            warpData(dates.date, dealtCellData, originData);
+
+            function warpData(data, storeArr, originData) {
+                data.forEach((xcelldata, i) => {
+                    if (util.isObject(xcelldata)) {
+                        let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle, xcelldata.style);
+                        totalWidth = warpCell(xcelldata.name, storeArr, totalWidth, options, originData);
+                    } else {
+                        let name = `${xcelldata}\n(${dates.week[i]})`;
+                        totalWidth = warpCell(name, storeArr, totalWidth, options, originData);
+                    }
                 });
-                this.totalCells += customXaxis.length;
+
+                function warpCell(name, storeArr, totalWidth, options, originData) {
+                    let width = options.width, height = options.height, rect = options.rect, text = options.text;
+                    let d = {
+                        id: name,
+                        name: 'Xcell',
+                        x: totalWidth,
+                        y: originData.y,
+                        width,
+                        height,
+                        text: name,
+                        style: {rect, text},
+                    };
+                    totalWidth += width;
+                    storeArr.push(d);
+
+                    return totalWidth;
+                }
+
             }
 
-            // 绘制日期
-            for (let i = 0, l = date.length; i < l; i++) {
-                let xCell = new XaxisCell(`xcell${i}`, 'xaxis', xCellWidth, op.height, i, cusAllWidth);
-                this.group.add(xCell.group);
-            }
-            this.totalCells += date.length;
-            store.set('xaxis', {
-                dealt: {
-                    totalWidth: cusAllWidth + date.length * xCellWidth,
-                    totalCells: this.totalCells
-                }
-            });
+            return {dealtCellData, cellWidth, totalWidth: totalWidth, totalCells: dealtCellData.length, customAllWidth,timeFormatInf};
+        }
+
+        // 拿日期
+        getDate() {
+            let timeRang = store.get('options').timeRang.split('-');
+            let startDate = new Date(timeRang[0]);
+            let endDate = new Date(timeRang[1]);
+            let dates = util.calculateDate(startDate, endDate, 'day');
+            // 设置开始时间
+            util.getX.setStart(startDate);
+            return dates;
+        }
+
+        //calculate cell width
+        calculateCellWidth(timeInf) {
+            let stageWidth = store.get('wh').width;
+            let yaxisWidth = store.get('options').yAxis.cell.width;
+            let xCellWidth = Math.floor((stageWidth - yaxisWidth) / timeInf.timeNum);
+            // 设置基础X/分钟
+            util.getX.setbaseXFromMin(xCellWidth);
+            return +xCellWidth;
+        }
+
+        getTimeFormatInf() {
+            let timeFormat = store.get('options').timeFormat;
+            let timeNum = timeFormat.slice(0, -1);
+            let timeType = timeFormat.slice(-1);
+            return {timeNum, timeType, timeFormat};
         }
     }
 
@@ -717,7 +898,6 @@ function aGanter(Konva) {
             super();
             let op = store.get('options').yAxis;
             let xop = store.get('options').xAxis;
-            this.totalCells = 0; // 包含元素总数
             //判断x轴和y轴是否重叠，重叠则y轴的y起始位x轴的高度
             let xx = xop.x;
             let yw = op.width;
@@ -759,7 +939,7 @@ function aGanter(Konva) {
                 data.forEach(ycelldata => {
                     if (util.isObject(ycelldata)) {
                         if (ycelldata.drawName) {
-                            let options = util.extend(true, {}, YaxisCell.defaultOp, cellStyle, ycelldata.nameStyle);
+                            let options = util.extend(true, {}, YaxisCell.defaultOp, cellStyle, ycelldata.style);
                             totalHeight = warpCell(ycelldata.name, storeArr, totalHeight, options, originData);
                         }
                         if (ycelldata.children) {
@@ -829,87 +1009,28 @@ function aGanter(Konva) {
     }
 
     class XaxisCell extends AxisCell {
-        constructor(id, name, w, h, i, cusAllWidth) {
-            super(id, name);
-            this.draw(w, h, i, this.group, cusAllWidth);
+        constructor(inf) {
+            super(inf.id, inf.name, inf.x, inf.y);
+            this.draw(inf);
         }
 
-        draw(width, height, i, group, cusAllWidth) {
-            let xAxisOp = store.get('xaxis');
-            let op = xAxisOp.options;
-            let dealt = xAxisOp.dealt;
-            let dates = dealt.dates;
-
-            if (util.isFunction(op.formatter)) {
-                op.formatter(Konva.Rect, Konva.Text, group, dealt, i, cusAllWidth)
-            } else {
-                let rect = new Konva.Rect({
-                    x: i * width + cusAllWidth,
-                    width,
-                    height,
-                    fill: '#c9c9c9',
-                    stroke: '#000',
-                    strokeWidth: 1,
-                });
-                let text = new Konva.Text({
-                    width,
-                    height,
-                    x: i * width + cusAllWidth,
-                    text: `${dates.date[i]}\n周${dates.week[i]}`,
-                    lineHeight: 1.2,
-                    align: 'center',
-                    verticalAlign: 'middle',
-                    fontSize: 12,
-                    wrap: 'none',
-                });
-                group.add(rect);
-                group.add(text);
-            }
-
-        }
-    }
-
-    class XaxisCusCell extends AxisCell {
-        constructor(id, name, w, h, x, i, cusAllWidth) {
-            super(id, name);
-            this.width = w;
-            this.height = h;
-            this.draw(w, h, this.group, x, i, cusAllWidth);
+        draw(inf) {
+            let group = this.group;
+            let rect = new Konva.Rect({
+                width: inf.width,
+                height: inf.height,
+                ...inf.style.rect,
+            });
+            let text = new Konva.Text({
+                width: inf.width,
+                height: inf.height,
+                text: inf.text,
+                ...inf.style.text,
+            });
+            group.add(rect);
+            group.add(text);
         }
 
-        draw(width, height, group, x, i, cusAllWidth) {
-            let xAxisOp = store.get('xaxis');
-            let op = xAxisOp.options;
-            let dealt = xAxisOp.dealt;
-
-
-            if (util.isFunction(x.formatter)) {
-                x.formatter(Konva.Rect, Konva.Text, group, dealt, x, i, cusAllWidth)
-            } else {
-                let rect = new Konva.Rect({
-                    x: x.x,
-                    width,
-                    height,
-                    fill: 'red',
-                    stroke: '#000',
-                    strokeWidth: 1,
-                });
-                let text = new Konva.Text({
-                    width,
-                    height,
-                    x: x.x,
-                    text: `${x.text}`,
-                    lineHeight: 1.2,
-                    align: 'center',
-                    verticalAlign: 'middle',
-                    fontSize: 12,
-                    wrap: 'none',
-                });
-                group.add(rect);
-                group.add(text);
-            }
-
-        }
     }
 
     class YaxisCell extends AxisCell {
@@ -936,37 +1057,10 @@ function aGanter(Konva) {
         }
     }
 
-    class WorkCell extends Cell {
-        static defaultOp = {
-            rect: {
-                fill: '#fff',
-                stroke: 'transparent',
-                strokeWidth: 0,
-            },
-            text: {
-                fill: '#000',
-                align: 'left',
-                verticalAlign: 'middle',
-                fontSize: 12,
-                warp: 'none',
-                lineHeight: 1,
-            }
-        };
-
-        constructor(id, name, data) {
-            super(id, name);
-            this.draw();
-        }
-
-        draw() {
-        }
-    }
-
-
     // GRID Class
     class Grid {
         constructor(config) {
-            this.group = new Konva.Group(config);
+            this.layer = new Konva.Layer(config);
         }
 
         draw() {
@@ -980,17 +1074,18 @@ function aGanter(Konva) {
         }
 
         draw() {
-            let yaxis = store.get('yaxis');
             let xaxis = store.get('xaxis');
+            let yaxis = store.get('yaxis');
             let xcells = xaxis.dealt.totalCells;
             let ycells = yaxis.dealt.totalCells;
+            let layer = this.layer;
             for (let x = 0; x < xcells; x++) {
                 let line = new Konva.Line({
-                    points: [(x + 1) * xaxis.dealt.xCellWidth, 0, (x + 1) * xaxis.dealt.xCellWidth, yaxis.dealt.totalHeight],
+                    points: [(x + 1) * xaxis.dealt.cellWidth, 0, (x + 1) * xaxis.dealt.cellWidth, yaxis.dealt.totalHeight],
                     stroke: '#c9c9c9',
                     strokeWidth: 1,
                 });
-                this.group.add(line);
+                layer.add(line);
             }
             for (let y = 0; y < ycells; y++) {
                 let line = new Konva.Line({
@@ -998,14 +1093,27 @@ function aGanter(Konva) {
                     stroke: '#c9c9c9',
                     strokeWidth: 1,
                 });
-                this.group.add(line);
+                layer.add(line);
             }
         }
-
     }
 
     // 工单类
     class WorkOrder {
+        static defaultOption = {
+            style: {
+                rect: {
+                    fillLinearGradientColorStops: [0, 'rgb(59, 92, 248)', 1, 'rgba(59, 92, 248,0.4)'],
+                },
+                text: {
+                    wrap: 'none',
+                    padding: 5,
+                    lineHeight: 1.2,
+                    verticalAlign: 'center',
+                },
+            }
+        };
+
         constructor(data) {
             this.layers = [];
             this.dealtData = this.dealWithData(data);
@@ -1023,7 +1131,6 @@ function aGanter(Konva) {
                     }
                     layer = new Konva.Layer({
                         name: 'workorder',
-                        x: 300,
                         x: options.xAxis.x,
                         y: options.yAxis.y,
                         stroke: 'red',
@@ -1034,6 +1141,7 @@ function aGanter(Konva) {
             this.layers.push(layer);
 
             function drawWO(inf, layer) {
+                let options = util.extend(true, {}, WorkOrder.defaultOption.style);
                 let id = inf.id, name = inf.name, x = +inf.x, y = +inf.y, height = inf.height, width = inf.width;
                 let group = new Konva.Group({
                     id,
@@ -1055,13 +1163,13 @@ function aGanter(Konva) {
                     width,
                     fillLinearGradientStartPoint: {x: 0, y: 0},
                     fillLinearGradientEndPoint: {x: width, y: 0},
-                    fillLinearGradientColorStops: [0, 'rgb(59, 92, 248)', 1, 'rgba(59, 92, 248,0.4)'],
+                    ...options.rect,
                 });
                 let text = new Konva.Text({
                     height,
                     width,
-                    text: inf.originData.name,
-
+                    text: `${inf.originData.name}\n${inf.originData.from} - ${inf.originData.to}`,
+                    ...options.text,
                 });
                 group.add(rect);
                 group.add(text);
@@ -1093,8 +1201,6 @@ function aGanter(Konva) {
 
             return dealtWOData;
         }
-
-
     }
 
     return new AGanter();
