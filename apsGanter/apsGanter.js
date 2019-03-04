@@ -620,12 +620,14 @@ function aGanter(Konva) {
         constructor() {
             this.stage = null;
             this.background = null;
+            this.initX = 0;
         }
 
         //
         init(params, scrollId, options) {
             this.stage = new Konva.Stage(params);
             this.scrollDiv = document.querySelector(scrollId);
+            this.initX = params.x;
             store.set('wh', {width: params.width, height: params.height});
             store.set('stage', {stage: this.stage, options});
             store.set('scrollDiv', {scrollDiv: this.scrollDiv});
@@ -679,6 +681,7 @@ function aGanter(Konva) {
             let stage = this.stage;
             stage.clearCache();
             stage.destroyChildren();
+            stage.x(this.initX);
         }
 
         bindEvent() {
@@ -691,7 +694,7 @@ function aGanter(Konva) {
                 let dy = this.scrollTop;
                 let xaxis = stage.find('#xaxis');
                 console.log('dx', dx);
-                console.log('preLoadRang', xaxisDealt.preLoadRang);
+                console.log('totalWidth', xaxisDealt.totalWidth);
                 if (dx + screenWidth > xaxisDealt.preLoadRang.endX && xaxisDealt.preLoadRang.endX < xaxisDealt.totalWidth) {
                     console.log('!!!!!!!!!!')
                     self.reset();
@@ -850,8 +853,12 @@ function aGanter(Konva) {
             let timeFormatInf = this.getTimeFormatInf();
             let cellWidth = this.calculateCellWidth(timeFormatInf);
             let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle);
+            let stage = store.get('stage').stage;
+            // 懒加载相关
             let isLazyLoad = store.get('stage').options.lazyLoad; //判断是否懒加载模式
             let preLoadRang = 0;
+            let isLoadEnd = false;
+            // 懒加载处理
             if (isLazyLoad) {
                 preLoadRang = this.processLazyLoad(cellWidth, timeFormatInf);
             }
@@ -861,6 +868,31 @@ function aGanter(Konva) {
                 customAllWidth = totalWidth;
             }
             warpData(dates.date, dealtCellData, originData);
+
+            // 反向修复endX,防止超过最大数
+            if(preLoadRang.endX>totalWidth){
+                preLoadRang.endX = totalWidth;
+            }
+
+            // 懒加载处理舞台定位,需等数据处理完
+            if (isLazyLoad) {
+                let firstCell = dealtCellData[0];
+                let originX = stage.x();
+                let container = stage.container();
+                stage.x(originX - firstCell.x);
+                container.style.transform = `translateX(${firstCell.x}px)`;
+            }
+            console.log('realWidth', realWidth)
+            return {
+                dealtCellData,
+                cellWidth,
+                realWidth,
+                totalWidth,
+                totalCells: dealtCellData.length,
+                customAllWidth,
+                timeFormatInf,
+                preLoadRang,
+            };
 
             function warpData(data, storeArr, originData) {
                 for (let i = 0, ii = data.length; i < ii; i++) {
@@ -878,7 +910,6 @@ function aGanter(Konva) {
                 function warpCell(name, storeArr, totalWidth, options, originData) {
                     let width = options.width, height = options.height, rect = options.rect, text = options.text;
                     // 开启懒加载
-                    debugger
                     if (isLazyLoad) {
                         if (totalWidth < preLoadRang.startX || totalWidth > preLoadRang.endX) {
                             return totalWidth += width;
@@ -897,29 +928,15 @@ function aGanter(Konva) {
                     };
                     totalWidth += width;
                     realWidth += width;
-                    // realWidth = totalWidth += width;
                     storeArr.push(d);
 
                     return totalWidth;
                 }
 
             }
-
-            console.log('realWidth', realWidth)
-            return {
-                dealtCellData,
-                cellWidth,
-                realWidth,
-                totalWidth,
-                totalCells: dealtCellData.length,
-                customAllWidth,
-                timeFormatInf,
-                preLoadRang,
-            };
         }
 
         processLazyLoad(cellWidth, timeFormatInf) {
-
             let scrollDiv = store.get('scrollDiv').scrollDiv;
             let sx = scrollDiv.scrollLeft;
             let preloadEle = 10;
@@ -932,9 +949,7 @@ function aGanter(Konva) {
                     sx = 0;
                 }
             }
-            debugger
             let preLoadRang = {startX: sx, endX: ex};
-
             return preLoadRang;
         }
 
