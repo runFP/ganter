@@ -78,7 +78,7 @@ var stage = ganter.init({
 ganter.setOption(
     {
         timeRang: '2019/01/21-2019/03/14',
-        timeFormat: '30d',
+        timeFormat: '14d',
         diagonal: {
             style: {
                 rect: {stroke: '#000', strokeWidth: 1},
@@ -628,6 +628,7 @@ function aGanter(Konva) {
             this.scrollDiv = document.querySelector(scrollId);
             store.set('wh', {width: params.width, height: params.height});
             store.set('stage', {stage: this.stage, options});
+            store.set('scrollDiv', {scrollDiv: this.scrollDiv});
             return this.stage;
         }
 
@@ -669,28 +670,62 @@ function aGanter(Konva) {
         }
 
         setTimeFormat(timeFormat) {
-            let stage = this.stage;
-            stage.clearCache();
-            stage.destroyChildren();
+            this.reset();
             store.set('options', {timeFormat: timeFormat});
             this.draw();
         }
 
+        reset() {
+            let stage = this.stage;
+            stage.clearCache();
+            stage.destroyChildren();
+        }
+
         bindEvent() {
+            let self = this;
             let scrollDiv = this.scrollDiv;
-            scrollDiv.addEventListener('scroll', function () {
+            let xaxisDealt = store.get('xaxis').dealt;
+            let screenWidth = store.get('wh').width;
+            let fn = util.debounce(function () {
                 let dx = this.scrollLeft;
                 let dy = this.scrollTop;
-                /*                let xaxis = stage.find('#xaxis');
-                                let yaxis = stage.find('#yaxis');
-                                let diagonal = stage.find('#diagonal');
-                                let background = stage.find('#background');
-                                xaxis.y(dy);
-                                diagonal.y(dy);
-                                yaxis.x(dx);
-                                diagonal.x(dx);
-                                background.draw();*/
-            });
+                let xaxis = stage.find('#xaxis');
+                console.log('dx', dx);
+                console.log('preLoadRang', xaxisDealt.preLoadRang);
+                if (dx + screenWidth > xaxisDealt.preLoadRang.endX && xaxisDealt.preLoadRang.endX < xaxisDealt.totalWidth) {
+                    console.log('!!!!!!!!!!')
+                    self.reset();
+                    self.draw();
+                } else if (dx < xaxisDealt.preLoadRang.startX) {
+
+                }
+            }, 300);
+            scrollDiv.addEventListener('scroll', fn);
+
+            /*  function () {
+                  let dx = this.scrollLeft;
+                  let dy = this.scrollTop;
+                  let xaxis = stage.find('#xaxis');
+                  console.log(dx);
+                  console.log(xaxisDealt.preLoadRang);
+                  console.log(screenWidth);
+                  console.log(xaxisDealt);
+                  if (dx + screenWidth > xaxisDealt.preLoadRang.endX && xaxisDealt.preLoadRang.endX < xaxisDealt.totalWidth) {
+                      console.log('!!!!!!!!!!')
+                      self.reset();
+                      self.draw();
+                  } else if (dx < xaxisDealt.preLoadRang.startX) {
+
+                  }
+                  /!* let yaxis = stage.find('#yaxis');
+                   let diagonal = stage.find('#diagonal');
+                   let background = stage.find('#background');
+                   xaxis.y(dy);
+                   diagonal.y(dy);
+                   yaxis.x(dx);
+                   diagonal.x(dx);
+                   background.draw();*!/
+              }*/
         }
 
 
@@ -708,10 +743,9 @@ function aGanter(Konva) {
                 fakeDom.style.width = `${totalWidth + xaxisX + 2}px`;
             }
 
-
             let stage = this.stage;
             let yaxis = store.get('yaxis');
-            stage.width(xaxis.dealt.totalWidth + xaxis.options.x + 2);
+            stage.width(xaxis.dealt.realWidth + xaxis.options.x + 2);
             stage.height(yaxis.dealt.totalHeight + yaxis.options.y + 2);
         }
     }
@@ -809,6 +843,7 @@ function aGanter(Konva) {
         dealWithData(originData) {
             let dealtCellData = [];
             let totalWidth = 0;
+            let realWidth = 0;
             let customAllWidth = 0;
             let cellStyle = originData.cell;
             let dates = this.getDate();
@@ -816,14 +851,11 @@ function aGanter(Konva) {
             let cellWidth = this.calculateCellWidth(timeFormatInf);
             let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle);
             let isLazyLoad = store.get('stage').options.lazyLoad; //判断是否懒加载模式
+            let preLoadRang = 0;
+            if (isLazyLoad) {
+                preLoadRang = this.processLazyLoad(cellWidth, timeFormatInf);
+            }
 
-            // 获取当前scrollx
-
-            // 判断当前xcell位置和起始/结束的xcell元素位置
-
-            //设置xaxis的x值
-
-                debugger
             if (originData.customData) {
                 warpData(originData.customData, dealtCellData, originData);
                 customAllWidth = totalWidth;
@@ -831,7 +863,9 @@ function aGanter(Konva) {
             warpData(dates.date, dealtCellData, originData);
 
             function warpData(data, storeArr, originData) {
-                data.forEach((xcelldata, i) => {
+                for (let i = 0, ii = data.length; i < ii; i++) {
+                    let xcelldata = data[i];
+
                     if (util.isObject(xcelldata)) {
                         let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle, xcelldata.style);
                         totalWidth = warpCell(xcelldata.name, storeArr, totalWidth, options, originData);
@@ -839,10 +873,18 @@ function aGanter(Konva) {
                         let name = `${xcelldata}\n(${dates.week[i]})`;
                         totalWidth = warpCell(name, storeArr, totalWidth, options, originData);
                     }
-                });
+                }
 
                 function warpCell(name, storeArr, totalWidth, options, originData) {
                     let width = options.width, height = options.height, rect = options.rect, text = options.text;
+                    // 开启懒加载
+                    debugger
+                    if (isLazyLoad) {
+                        if (totalWidth < preLoadRang.startX || totalWidth > preLoadRang.endX) {
+                            return totalWidth += width;
+                        }
+                    }
+
                     let d = {
                         id: name,
                         name: 'Xcell',
@@ -854,6 +896,8 @@ function aGanter(Konva) {
                         style: {rect, text},
                     };
                     totalWidth += width;
+                    realWidth += width;
+                    // realWidth = totalWidth += width;
                     storeArr.push(d);
 
                     return totalWidth;
@@ -861,7 +905,37 @@ function aGanter(Konva) {
 
             }
 
-            return {dealtCellData, cellWidth, totalWidth: totalWidth, totalCells: dealtCellData.length, customAllWidth,timeFormatInf};
+            console.log('realWidth', realWidth)
+            return {
+                dealtCellData,
+                cellWidth,
+                realWidth,
+                totalWidth,
+                totalCells: dealtCellData.length,
+                customAllWidth,
+                timeFormatInf,
+                preLoadRang,
+            };
+        }
+
+        processLazyLoad(cellWidth, timeFormatInf) {
+
+            let scrollDiv = store.get('scrollDiv').scrollDiv;
+            let sx = scrollDiv.scrollLeft;
+            let preloadEle = 10;
+            let perLoadEleWidth = preloadEle * cellWidth;
+            let screenEleWidth = timeFormatInf.timeNum * cellWidth;
+            let ex = sx + perLoadEleWidth + screenEleWidth;
+            if (sx > 0) {
+                sx -= perLoadEleWidth;
+                if (sx < 0) {
+                    sx = 0;
+                }
+            }
+            debugger
+            let preLoadRang = {startX: sx, endX: ex};
+
+            return preLoadRang;
         }
 
         // 拿日期
@@ -1117,7 +1191,6 @@ function aGanter(Konva) {
         constructor(data) {
             this.layers = [];
             this.dealtData = this.dealWithData(data);
-            console.log(this.dealtData)
         }
 
         draw() {
