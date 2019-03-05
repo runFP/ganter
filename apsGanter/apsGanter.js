@@ -844,15 +844,16 @@ function aGanter(Konva) {
 
         dealWithData(originData) {
             let dealtCellData = [];
-            let totalWidth = 0;
+            let cellX = 0;
             let realWidth = 0;
-            let customAllWidth = 0;
             let cellStyle = originData.cell;
             let dates = this.getDate();
             let timeFormatInf = this.getTimeFormatInf();
             let oldCellWidth = store.get('cellWidth');
             let cellWidth = this.calculateCellWidth(timeFormatInf);
             let timeFormat = store.get('timeFormat').status;
+            let totalWidth = 0;
+            let customAllWidth = 0;
             store.set('cellWidth', cellWidth);
 
             let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle);
@@ -860,21 +861,9 @@ function aGanter(Konva) {
             let isLazyLoad = store.get('stage').options.lazyLoad; //判断是否懒加载模式
             let preLoadRang = 0;
             let isLoadEnd = false;
-            // 懒加载处理
-            if (isLazyLoad) {
-                preLoadRang = this.processLazyLoad(cellWidth, timeFormatInf);
-            }
-
-            if (originData.customData) {
-                warpData(originData.customData, dealtCellData, originData);
-                customAllWidth = totalWidth;
-            }
-            warpData(dates.date, dealtCellData, originData);
-
-            // 反向修复endX,防止超过最大数
-            if (preLoadRang.endX > totalWidth) {
-                preLoadRang.endX = totalWidth;
-            }
+            let widths = this.calculateTotalWidth(originData, cellWidth, cellStyle);
+            totalWidth = widths.totalWidth;
+            customAllWidth = widths.customAllWidth;
 
             // 时间格式改变
             if (timeFormat) {
@@ -888,17 +877,26 @@ function aGanter(Konva) {
                 store.set('timeFormat', {status: false});
             }
 
+            // 懒加载处理
+            if (isLazyLoad) {
+                preLoadRang = this.processLazyLoad(cellWidth, timeFormatInf, totalWidth);
+            }
+
+            collectCell();
+
             // 懒加载处理舞台和网格定位,需等数据处理完
             if (isLazyLoad) {
                 let stage = store.get('stage').stage;
                 let backgroundGrid = store.get('backgroundGrid').backgroundGrid;
                 let firstCell = dealtCellData[0];
+                let lastCell = dealtCellData[dealtCellData.length - 1];
                 let originX = stage.x();
                 let container = stage.container();
                 stage.x(originX - firstCell.x);
                 container.style.transform = `translateX(${firstCell.x}px)`;
                 backgroundGrid.x(firstCell.x + originData.x);
             }
+
             return {
                 dealtCellData,
                 cellWidth,
@@ -910,63 +908,79 @@ function aGanter(Konva) {
                 preLoadRang,
             };
 
+            function collectCell(reset = false) {
+                if (reset) {
+                    dealtCellData = [];
+                }
+                if (originData.customData) {
+                    warpData(originData.customData, dealtCellData, originData);
+                }
+                warpData(dates.date, dealtCellData, originData);
+            }
+
             function warpData(data, storeArr, originData) {
                 for (let i = 0, ii = data.length; i < ii; i++) {
                     let xcelldata = data[i];
 
                     if (util.isObject(xcelldata)) {
                         let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle, xcelldata.style);
-                        totalWidth = warpCell(xcelldata.name, storeArr, totalWidth, options, originData);
+                        warpCell(xcelldata.name, storeArr, options, originData);
                     } else {
                         let name = `${xcelldata}\n(${dates.week[i]})`;
-                        totalWidth = warpCell(name, storeArr, totalWidth, options, originData);
+                        warpCell(name, storeArr, options, originData);
                     }
                 }
 
-                function warpCell(name, storeArr, totalWidth, options, originData) {
+                function warpCell(name, storeArr, options, originData) {
                     let width = options.width, height = options.height, rect = options.rect, text = options.text;
                     // 开启懒加载
                     if (isLazyLoad) {
-                        if (totalWidth < preLoadRang.startX || totalWidth > preLoadRang.endX) {
-                            return totalWidth += width;
+                        if (cellX < preLoadRang.startX || cellX > preLoadRang.endX) {
+                            cellX += width;
+                            return
                         }
                     }
 
                     let d = {
                         id: name,
                         name: 'Xcell',
-                        x: totalWidth,
+                        x: cellX,
                         y: originData.y,
                         width,
                         height,
                         text: name,
                         style: {rect, text},
                     };
-                    totalWidth += width;
+                    cellX += width;
                     realWidth += width;
                     storeArr.push(d);
-
-                    return totalWidth;
                 }
 
             }
         }
 
-        processLazyLoad(cellWidth, timeFormatInf) {
-            debugger
+        processLazyLoad(cellWidth, timeFormatInf, totalWidth) {
             let scrollDiv = store.get('scrollDiv').scrollDiv;
             let sx = scrollDiv.scrollLeft;
             let preloadEle = 10;
             let perLoadEleWidth = preloadEle * cellWidth;
             let screenEleWidth = timeFormatInf.timeNum * cellWidth;
             let ex = sx + perLoadEleWidth + screenEleWidth;
+            let miniPreloadWidth = screenEleWidth + perLoadEleWidth; // 最小加载宽度（结尾只需要预加载前面数量）
             if (sx > 0) {
                 sx -= perLoadEleWidth;
                 if (sx < 0) {
                     sx = 0;
+                } else if (totalWidth - sx < miniPreloadWidth) {
+                    sx = totalWidth - miniPreloadWidth;
                 }
             }
-            let preLoadRang = {startX: sx, endX: ex};
+            if (ex > totalWidth) {
+                ex = totalWidth;
+            }
+
+
+            let preLoadRang = {startX: sx, endX: ex, miniPreloadWidth};
             return preLoadRang;
         }
 
@@ -989,6 +1003,31 @@ function aGanter(Konva) {
             // 设置基础X/分钟
             util.getX.setbaseXFromMin(xCellWidth);
             return +xCellWidth;
+        }
+
+        calculateTotalWidth(originData, cellWidth, cellStyle) {
+            let totalWidth = 0;
+            let customAllWidth = 0;
+            let dates = this.getDate();
+            let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle);
+            if (originData.customData) {
+                calculateWidth(originData.customData, originData);
+                customAllWidth = totalWidth;
+            }
+            calculateWidth(dates.date);
+
+            return {customAllWidth, totalWidth};
+
+            function calculateWidth(data) {
+                for (let i = 0, ii = data.length; i < ii; i++) {
+                    let xcelldata = data[i];
+                    if (util.isObject(xcelldata)) {
+                        options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle, xcelldata.style);
+                    }
+                    let width = options.width;
+                    totalWidth += width;
+                }
+            }
         }
 
         getTimeFormatInf() {
