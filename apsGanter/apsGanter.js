@@ -1,4 +1,5 @@
 import Konva from 'konva';
+import Moment from 'moment';
 
 var srollbox = document.querySelector('.srollbox');
 var d1 = document.querySelector('#d1');
@@ -12,7 +13,7 @@ var height = srollbox.offsetHeight;
 function f(n) {
     let arr = [];
     for (let i = 0; i < n; i++) {
-        var s = `2019-02-${Math.floor(Math.random() * 10) + 1} 14:00:00`;
+        var s = `2019-02-${Math.floor(Math.random() * 10) + 1} 00:00:00`;
         var e = new Date(new Date(s).getTime() + 1000 * 60 * 60 * 24);
         let o = {
             "id": "d924c076f84049bd98b04ce23420d788",
@@ -66,7 +67,7 @@ function f(n) {
     return arr
 }
 
-var tasks = f(50);
+var tasks = f(3);
 var ganter = aGanter(Konva);
 var stage = ganter.init({
     container: 'container',
@@ -198,24 +199,19 @@ ganter.setOption(
                     name: 'PZZ1KX0006',
                     tasks: tasks,
                 }
-            ]
+            ],
+        onCellDraw(cell, currentTime, offsetTime) {
+            let dimension = cell.dimension;
+            let originCell = this.series[dimension.od].tasks[dimension.td];
+            originCell.from = Moment(currentTime).format('YYYY-MM-DD HH:mm:ss');
+            originCell.to = Moment(originCell.to).add(offsetTime, 'ms').format('YYYY-MM-DD HH:mm:ss');
+            // originCell.to = new Date(originCell.to.getTime() + offsetTime);
+            console.log('originCell.from', originCell.from);
+            console.log('originCell.to', originCell.to);
+        }
     }
 );
 ganter.render();
-
-/*srollbox.addEventListener('scroll', function () {
-    let dx = srollbox.scrollLeft;
-    let dy = srollbox.scrollTop;
-    let xaxis = stage.find('#xaxis');
-    let yaxis = stage.find('#yaxis');
-    let diagonal = stage.find('#diagonal');
-    let background = stage.find('#background');
-    xaxis.y(dy);
-    diagonal.y(dy);
-    yaxis.x(dx);
-    diagonal.x(dx);
-    background.draw();
-});*/
 
 d14.addEventListener('click', function () {
     ganter.setTimeFormat('14d');
@@ -524,11 +520,21 @@ function aGanter(Konva) {
             start: 0,
             dayMin: 1440,
             baseXFromMin: 0,
+            xaxisX: 0,
             setStart: function (s) {
                 this.start = new Date(s).getTime();
             },
-            setbaseXFromMin: function (w) {
+            setBaseXFromMin: function (w) {
                 this.baseXFromMin = w / this.dayMin;
+            },
+            transformX2Millisecond: function (x) {
+                return x / this.baseXFromMin * 60 * 1000;
+            },
+            timeFromXaxis: function (x) {
+                return (x - this.xaxisX) / this.baseXFromMin * 60 * 1000;
+            },
+            getNewDate(time) {
+                return time + this.start;
             },
             fromTime: function (time) {
                 return +this.getWidth(this.start, time);
@@ -643,6 +649,7 @@ function aGanter(Konva) {
         setOption(option) {
             // 默认配置
             let options = util.extend(true, {}, AGanter.defaultOption, option);
+            util.getX.xaxisX = options.xAxis.x || 0;
             store.set('options', options);
         }
 
@@ -671,7 +678,9 @@ function aGanter(Konva) {
 
             // 添加入舞台
             stage.add(backgroundGrid.layer);
-            stage.add(...workorder.layers);
+            if (workorder.layers[0] !== null) {
+                stage.add(...workorder.layers);
+            }
             stage.add(background.layer);
             this.resetStageWH();
         }
@@ -852,15 +861,14 @@ function aGanter(Konva) {
             let oldCellWidth = store.get('cellWidth');
             let cellWidth = this.calculateCellWidth(timeFormatInf);
             let timeFormat = store.get('timeFormat').status;
-            let totalWidth = 0;
-            let customAllWidth = 0;
+            let totalWidth, customAllWidth;
+            let stageOffsetX = 0;
             store.set('cellWidth', cellWidth);
 
             let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle);
             // 懒加载相关
             let isLazyLoad = store.get('stage').options.lazyLoad; //判断是否懒加载模式
             let preLoadRang = 0;
-            let isLoadEnd = false;
             let widths = this.calculateTotalWidth(originData, cellWidth, cellStyle);
             totalWidth = widths.totalWidth;
             customAllWidth = widths.customAllWidth;
@@ -889,11 +897,11 @@ function aGanter(Konva) {
                 let stage = store.get('stage').stage;
                 let backgroundGrid = store.get('backgroundGrid').backgroundGrid;
                 let firstCell = dealtCellData[0];
-                let lastCell = dealtCellData[dealtCellData.length - 1];
                 let originX = stage.x();
                 let container = stage.container();
                 stage.x(originX - firstCell.x);
-                container.style.transform = `translateX(${firstCell.x}px)`;
+                stageOffsetX = firstCell.x;
+                container.style.transform = `translateX(${stageOffsetX}px)`;
                 backgroundGrid.x(firstCell.x + originData.x);
             }
 
@@ -906,6 +914,7 @@ function aGanter(Konva) {
                 customAllWidth,
                 timeFormatInf,
                 preLoadRang,
+                stageOffsetX,
             };
 
             function collectCell(reset = false) {
@@ -1001,7 +1010,7 @@ function aGanter(Konva) {
             let yaxisWidth = store.get('options').yAxis.cell.width;
             let xCellWidth = Math.floor((stageWidth - yaxisWidth) / timeInf.timeNum);
             // 设置基础X/分钟
-            util.getX.setbaseXFromMin(xCellWidth);
+            util.getX.setBaseXFromMin(xCellWidth);
             return +xCellWidth;
         }
 
@@ -1279,6 +1288,7 @@ function aGanter(Konva) {
             let dealtData = this.dealtData;
             let layer = null;
             let options = store.get('options');
+            let stageOffsetX = store.get('xaxis').dealt.stageOffsetX;
             dealtData.forEach((w, i) => {
                 if (i % 500 === 0) {
                     if (layer) {
@@ -1291,11 +1301,11 @@ function aGanter(Konva) {
                         stroke: 'red',
                     });
                 }
-                drawWO(w, layer);
+                drawWO(w, layer, options);
             });
             this.layers.push(layer);
 
-            function drawWO(inf, layer) {
+            function drawWO(inf, layer, originOptions) {
                 let options = util.extend(true, {}, WorkOrder.defaultOption.style);
                 let id = inf.id, name = inf.name, x = +inf.x, y = +inf.y, height = inf.height, width = inf.width;
                 let group = new Konva.Group({
@@ -1307,9 +1317,27 @@ function aGanter(Konva) {
                     width,
                     draggable: true,
                     dragBoundFunc: function (pos) {
+                        let adjustPosX = pos.x + stageOffsetX;
+                        let currentTime = util.getX.getNewDate(util.getX.timeFromXaxis(adjustPosX));
+                        let offsetTime = util.getX.transformX2Millisecond(pos.x - this.getAbsolutePosition().x);
+                        let posy;
+                        inf.x = pos.x;
+
+                        this.find('Text')[0].text(`${inf.originData.name}\n${Moment(currentTime).format('YYYY-MM-DD HH:mm:ss')} - ${Moment(inf.originData.to).add(offsetTime, 'ms').format('YYYY-MM-DD HH:mm:ss')}`);
+                        if (originOptions.onCellDraw) {
+                            originOptions.onCellDraw(inf, currentTime, offsetTime);
+                        }
+                        if (pos.y > y + height) {
+                            posy = pos.y;
+                        } else {
+                            posy = this.getAbsolutePosition().y
+                        }
+                        console.log(pos.y)
+                        console.log(this.getAbsolutePosition().y)
                         return {
                             x: pos.x,
-                            y: this.getAbsolutePosition().y
+                            // y:  pos.y
+                            y: posy,
                         };
                     }
                 });
@@ -1336,19 +1364,30 @@ function aGanter(Konva) {
             let getx = util.getX;
             let yaxis = store.get('yaxis').options;
             let dealtWOData = [];
-            originData.forEach(order => {
+            let preLoadRang = store.get('xaxis').dealt.preLoadRang;
+            let startX = preLoadRang.startX;
+            let endX = preLoadRang.endX;
+            let isLazyLoad = store.get('stage').options.lazyLoad; //判断是否懒加载模式
+            originData.forEach((order, od) => {
                 let tasks = order.tasks;
                 let y = util.yMap.getY(order.name);
                 let belong = order.belong;
-                tasks.forEach(task => {
+                tasks.forEach((task, td) => {
+                    let from = getx.fromTime(task.from);
+                    let width = getx.getWidth(task.from, task.to);
+                    let to = from + width;
+                    if (isLazyLoad) {
+                        if (to < startX || from > endX) return;
+                    }
                     let handbill = {
                         id: task.id,
                         name: `${task.flag} ${belong}`,
                         y: y,
-                        x: getx.fromTime(task.from),
-                        width: getx.getWidth(task.from, task.to),
+                        x: from,
+                        width,
                         height: yaxis.cell.height,
                         originData: task,
+                        dimension: {od, td}
                     };
                     dealtWOData.push(handbill);
                 })
