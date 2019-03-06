@@ -1317,26 +1317,28 @@ function aGanter(Konva) {
                     width,
                     draggable: true,
                     dragBoundFunc: function (pos) {
+                        let y = +inf.y;
                         let adjustPosX = pos.x + stageOffsetX;
                         let currentTime = util.getX.getNewDate(util.getX.timeFromXaxis(adjustPosX));
                         let offsetTime = util.getX.transformX2Millisecond(pos.x - this.getAbsolutePosition().x);
                         let posy;
                         inf.x = pos.x;
-
+                        // Text文本变更
                         this.find('Text')[0].text(`${inf.originData.name}\n${Moment(currentTime).format('YYYY-MM-DD HH:mm:ss')} - ${Moment(inf.originData.to).add(offsetTime, 'ms').format('YYYY-MM-DD HH:mm:ss')}`);
-                        if (originOptions.onCellDraw) {
-                            originOptions.onCellDraw(inf, currentTime, offsetTime);
-                        }
-                        if (pos.y > y + height) {
-                            posy = pos.y;
+                        // Y轴拖动
+                        if (pos.y > y + height*2 &&pos.y < y + height*3) {
+                            posy = y + height*2;
+                            inf.y =y+height;
                         } else {
                             posy = this.getAbsolutePosition().y
                         }
-                        console.log(pos.y)
-                        console.log(this.getAbsolutePosition().y)
+                        // 表格元素拖动回调
+                        if (originOptions.onCellDraw) {
+                            originOptions.onCellDraw(inf, currentTime, offsetTime);
+                        }
+
                         return {
                             x: pos.x,
-                            // y:  pos.y
                             y: posy,
                         };
                     }
