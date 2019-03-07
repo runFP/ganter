@@ -48,26 +48,26 @@ function f(n) {
             },
             "moResCodePriorities": [
                 {
-                    "Key": "PPF1PF0001",
-                    "Value": "5"
+                    "Key": "PZZ1KX0001",
+                    "Value": (Math.random() * 10)
                 },
                 {
-                    "Key": "PCY1CY0003",
-                    "Value": "1"
+                    "Key": "PZZ1KX0004",
+                    "Value": (Math.random() * 10)
                 },
                 {
-                    "Key": "PCY1CY0001",
-                    "Value": "1"
-                }
+                    "Key": "PZZ1KX0005",
+                    "Value": (Math.random() * 10)
+                },
             ],
-            "visible": true
+            "visible": true,
         };
         arr.push(o);
     }
     return arr
 }
 
-var tasks = f(3);
+var tasks = f(500);
 var ganter = aGanter(Konva);
 var stage = ganter.init({
     container: 'container',
@@ -75,7 +75,7 @@ var stage = ganter.init({
     height: height,
     x: .5,
     y: .5
-}, '.srollbox', {lazyLoad: true});
+}, '.srollbox', '.outbox', {lazyLoad: true});
 ganter.setOption(
     {
         timeRang: '2019/01/21-2019/03/14',
@@ -206,8 +206,8 @@ ganter.setOption(
             originCell.from = Moment(currentTime).format('YYYY-MM-DD HH:mm:ss');
             originCell.to = Moment(originCell.to).add(offsetTime, 'ms').format('YYYY-MM-DD HH:mm:ss');
             // originCell.to = new Date(originCell.to.getTime() + offsetTime);
-            console.log('originCell.from', originCell.from);
-            console.log('originCell.to', originCell.to);
+            /*console.log('originCell.from', originCell.from);
+            console.log('originCell.to', originCell.to);*/
         }
     }
 );
@@ -235,7 +235,7 @@ function aGanter(Konva) {
     // 辅助函数:公共方法和方法定义
     var util = {
         //扩展，首参传ture则为深扩展,参数基本与jq.extend一致
-        extend: function () {
+        extend() {
             var args = [].slice.call(arguments);
             if (typeof args[0] === 'boolean' && args[0]) {
                 args = args.splice(1);
@@ -297,13 +297,63 @@ function aGanter(Konva) {
                 return Object.assign.apply(null, args);
             }
         },
-        createDom: function (params) {
+        createDom(params) {
             let dom = document.createElement('div');
             dom.style.cssText = [
                 `width:${params.width}px`,
                 'height:1px',
-                'backgound-color:transparent',
+                'background-color:transparent',
+                'visibility:hidden',
             ].join(';') + ';';
+            return dom;
+        },
+        createLoadDom(params) {
+            let dom = document.createElement('div');
+            let shadowDom = document.createElement('div');
+            let loading = document.createElement('div');
+            let text = document.createElement('span');
+            dom.style.cssText = [
+                `width:${params.width}px`,
+                `height:${params.height}px`,
+                'text-align:center',
+                'position:absolute',
+                'top:0',
+                'left:0',
+                'z-index:9999',
+                'display:none',
+            ].join(';') + ';';
+            shadowDom.style.cssText = [
+                'width:100%',
+                'height:100%',
+                'background-color:rgba(0,0,0,.7)',
+            ].join(';') + ';';
+            loading.style.cssText = [
+                'width:50px',
+                'height:50px',
+                'background-color:#fff',
+                'position:absolute',
+                'top:50%',
+                'left:50%',
+                'border-radius:10px',
+                'transform:translateXY(-50%,-50%)',
+                'animation: spin 1s linear infinite',
+            ].join(';') + ';';
+            text.style.cssText = [
+                'width:50px',
+                'height:50px',
+                'text-align:center',
+                'color:#000',
+                'position:absolute',
+                'top:50%',
+                'left:50%',
+                'font-size:12px',
+                'line-height:50px',
+                'transform:translateXY(-50%,-50%)',
+            ].join(';') + ';';
+            text.innerText = 'Loading';
+            dom.appendChild(shadowDom);
+            dom.appendChild(loading);
+            dom.appendChild(text);
             return dom;
         },
         /**
@@ -312,7 +362,7 @@ function aGanter(Konva) {
          * @param length 持续时间(h,w,m, h会将时间转为小时，w,m都是转换为天)
          * @param type 类型 day, hour
          */
-        calculateDate: function (startDate, endDate, type, length) {
+        calculateDate(startDate, endDate, type, length) {
             var lengthPattern = false;
             if (!endDate) {
                 length = length || '2w';
@@ -440,7 +490,7 @@ function aGanter(Konva) {
             }
 
         },
-        debounce: function (fn, wait, immediately) {
+        debounce(fn, wait, immediately) {
             var timeID;
             return function () {
                 var me = this;
@@ -462,13 +512,13 @@ function aGanter(Konva) {
                 }
             };
         },
-        isArray: function (arr) {
+        isArray(arr) {
             return toString.call(arr) === '[object Array]';
         },
-        isObject: function (obj) {
+        isObject(obj) {
             return toString.call(obj) === '[object Object]';
         },
-        isFunction: function (fn) {
+        isFunction(fn) {
             return toString.call(fn) === '[object Function]';
         },
         /**
@@ -635,10 +685,13 @@ function aGanter(Konva) {
         }
 
         //
-        init(params, scrollId, options) {
+        init(params, scrollId, outId, options) {
             this.stage = new Konva.Stage(params);
             this.scrollDiv = document.querySelector(scrollId);
+            this.outbox = document.querySelector(outId);
             this.initX = params.x;
+            this.loadDom = util.createLoadDom({width: params.width, height: params.height});
+            this.outbox.appendChild(this.loadDom);
             store.set('wh', {width: params.width, height: params.height});
             store.set('stage', {stage: this.stage, options});
             store.set('scrollDiv', {scrollDiv: this.scrollDiv});
@@ -725,11 +778,16 @@ function aGanter(Konva) {
             };
             let delayFn = util.debounce(function (dx, xaxisDealt) {
                 if ((dx + screenWidth > xaxisDealt.preLoadRang.endX && xaxisDealt.preLoadRang.endX < xaxisDealt.totalWidth) || (dx < xaxisDealt.preLoadRang.startX && xaxisDealt.preLoadRang.startX !== 0)) {
-                    console.log('additional');
-                    self.reset();
-                    self.draw();
+                    self.loadDom.style.display = 'block';
+                    self.scrollDiv.style.overflow = 'hidden';
+                    setTimeout(function () {
+                        self.reset();
+                        self.draw();
+                        self.loadDom.style.display = 'none';
+                        self.scrollDiv.style.overflow = 'auto';
+                    })
                 }
-            }, 300);
+            }, 100);
             scrollDiv.addEventListener('scroll', fn);
         }
 
@@ -1307,7 +1365,8 @@ function aGanter(Konva) {
 
             function drawWO(inf, layer, originOptions) {
                 let options = util.extend(true, {}, WorkOrder.defaultOption.style);
-                let id = inf.id, name = inf.name, x = +inf.x, y = +inf.y, height = inf.height, width = inf.width;
+                let id = inf.id, name = inf.name, x = +inf.x, y = +inf.y, height = inf.height, width = inf.width,
+                    originData = inf.originData;
                 let group = new Konva.Group({
                     id,
                     name,
@@ -1317,21 +1376,37 @@ function aGanter(Konva) {
                     width,
                     draggable: true,
                     dragBoundFunc: function (pos) {
-                        let y = +inf.y;
                         let adjustPosX = pos.x + stageOffsetX;
                         let currentTime = util.getX.getNewDate(util.getX.timeFromXaxis(adjustPosX));
                         let offsetTime = util.getX.transformX2Millisecond(pos.x - this.getAbsolutePosition().x);
-                        let posy;
+                        let posy = this.getAbsolutePosition().y;
+                        let Ydirection = pos.y > this.getAbsolutePosition().y ? 'down' : 'up';
                         inf.x = pos.x;
+
                         // Text文本变更
                         this.find('Text')[0].text(`${inf.originData.name}\n${Moment(currentTime).format('YYYY-MM-DD HH:mm:ss')} - ${Moment(inf.originData.to).add(offsetTime, 'ms').format('YYYY-MM-DD HH:mm:ss')}`);
                         // Y轴拖动
-                        if (pos.y > y + height*2 &&pos.y < y + height*3) {
-                            posy = y + height*2;
-                            inf.y =y+height;
-                        } else {
-                            posy = this.getAbsolutePosition().y
+                        if (originData.moResCodePriorities) {
+                            let mm = originData.moResCodePriorities;
+                            for (let m = 0, ml = mm.length; m < ml; m++) {
+                                let keyHeight = util.yMap.getY(mm[m].Key);
+                                if (Ydirection === 'up') {
+                                    if (pos.y > keyHeight && pos.y < keyHeight + height) {
+                                        posy = keyHeight + height;
+                                        inf.y = keyHeight;
+                                        break;
+                                    }
+                                } else if (Ydirection === 'down') {
+                                    if (pos.y > keyHeight + height && pos.y < keyHeight + height * 2) {
+                                        posy = keyHeight + height;
+                                        inf.y = keyHeight;
+                                        break;
+                                    }
+                                }
+
+                            }
                         }
+
                         // 表格元素拖动回调
                         if (originOptions.onCellDraw) {
                             originOptions.onCellDraw(inf, currentTime, offsetTime);

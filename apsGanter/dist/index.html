@@ -5,17 +5,32 @@
     <title>Title</title>
     <script type="text/javascript" src="./main.js" defer></script>
     <style>
+        .outbox{
+            position: relative;
+        }
         .srollbox{
             width:  1200px;
             height: 300px;
             overflow: auto;
         }
+        @keyframes spin{
+            from {
+                -webkit-transform: rotate(0deg);
+            }
+
+            to {
+                -webkit-transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 <body style="margin: 0; padding: 0;">
-<div class="srollbox">
-    <div id="container"></div>
+<div class="outbox">
+    <div class="srollbox">
+        <div id="container"></div>
+    </div>
 </div>
+
 <button id="d1">Format 1DAY</button>
 <button id="d3">Format 3DAY</button>
 <button id="d7">Format 7DAY</button>
