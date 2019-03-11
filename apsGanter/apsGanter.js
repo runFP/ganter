@@ -67,7 +67,7 @@ function f(n) {
     return arr
 }
 
-var tasks = f(500);
+var tasks = f(3000);
 var ganter = aGanter(Konva);
 var stage = ganter.init({
     container: 'container',
@@ -342,7 +342,9 @@ function aGanter(Konva) {
                 'width:50px',
                 'height:50px',
                 'text-align:center',
-                'color:#000',
+                'color:#138FB2',
+                'font-family:Roboto, helvetica, arial, sans-serif',
+                'font-weight:400',
                 'position:absolute',
                 'top:50%',
                 'left:50%',
@@ -923,7 +925,7 @@ function aGanter(Konva) {
             let stageOffsetX = 0;
             store.set('cellWidth', cellWidth);
 
-            let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle);
+            let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOption, cellStyle);
             // 懒加载相关
             let isLazyLoad = store.get('stage').options.lazyLoad; //判断是否懒加载模式
             let preLoadRang = 0;
@@ -990,7 +992,7 @@ function aGanter(Konva) {
                     let xcelldata = data[i];
 
                     if (util.isObject(xcelldata)) {
-                        let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle, xcelldata.style);
+                        let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOption, cellStyle, xcelldata.style);
                         warpCell(xcelldata.name, storeArr, options, originData);
                     } else {
                         let name = `${xcelldata}\n(${dates.week[i]})`;
@@ -1076,7 +1078,7 @@ function aGanter(Konva) {
             let totalWidth = 0;
             let customAllWidth = 0;
             let dates = this.getDate();
-            let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle);
+            let options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOption, cellStyle);
             if (originData.customData) {
                 calculateWidth(originData.customData, originData);
                 customAllWidth = totalWidth;
@@ -1089,7 +1091,7 @@ function aGanter(Konva) {
                 for (let i = 0, ii = data.length; i < ii; i++) {
                     let xcelldata = data[i];
                     if (util.isObject(xcelldata)) {
-                        options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOp, cellStyle, xcelldata.style);
+                        options = util.extend(true, {width: cellWidth}, XaxisCell.defaultOption, cellStyle, xcelldata.style);
                     }
                     let width = options.width;
                     totalWidth += width;
@@ -1149,7 +1151,7 @@ function aGanter(Konva) {
             let dealtCellData = [];
             let totalHeight = 0;
             let cellStyle = originData.cell;
-            let options = util.extend(true, {}, YaxisCell.defaultOp, cellStyle);
+            let options = util.extend(true, {}, YaxisCell.defaultOption, cellStyle);
 
             if (originData.customData) {
                 warpData(originData.customData, dealtCellData, originData);
@@ -1160,7 +1162,7 @@ function aGanter(Konva) {
                 data.forEach(ycelldata => {
                     if (util.isObject(ycelldata)) {
                         if (ycelldata.drawName) {
-                            let options = util.extend(true, {}, YaxisCell.defaultOp, cellStyle, ycelldata.style);
+                            let options = util.extend(true, {}, YaxisCell.defaultOption, cellStyle, ycelldata.style);
                             totalHeight = warpCell(ycelldata.name, storeArr, totalHeight, options, originData);
                         }
                         if (ycelldata.children) {
@@ -1208,7 +1210,7 @@ function aGanter(Konva) {
     }
 
     class AxisCell extends Cell {
-        static defaultOp = {
+        static defaultOption = {
             rect: {
                 fill: '#fff',
                 stroke: 'transparent',
@@ -1220,7 +1222,9 @@ function aGanter(Konva) {
                 verticalAlign: 'middle',
                 fontSize: 12,
                 warp: 'none',
-                lineHeight: 1,
+                lineHeight: 1.2,
+                fontFamily:'微软雅黑',
+                fontWeight:'400',
             }
         };
 
@@ -1333,6 +1337,8 @@ function aGanter(Konva) {
                     padding: 5,
                     lineHeight: 1.2,
                     verticalAlign: 'center',
+                    fontFamily:'微软雅黑',
+                    fontWeight:'400',
                 },
             }
         };
