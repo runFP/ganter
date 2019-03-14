@@ -1,35 +1,42 @@
 import Konva from 'konva';
 import Moment from 'moment';
 
-var srollbox = document.querySelector('.srollbox');
-var d1 = document.querySelector('#d1');
-var d3 = document.querySelector('#d3');
-var d7 = document.querySelector('#d7');
-var d14 = document.querySelector('#d14');
-var d30 = document.querySelector('#d30');
-var width = srollbox.offsetWidth;
-var height = srollbox.offsetHeight;
+let srollbox = document.querySelector('.srollbox');
+let d1 = document.querySelector('#d1');
+let d3 = document.querySelector('#d3');
+let d7 = document.querySelector('#d7');
+let d14 = document.querySelector('#d14');
+let d30 = document.querySelector('#d30');
+let width = srollbox.offsetWidth;
+let height = srollbox.offsetHeight;
 
 function f(n) {
     let arr = [];
     for (let i = 0; i < n; i++) {
-        var s = `2019-02-${Math.floor(Math.random() * 10) + 1} 00:00:00`;
-        var e = new Date(new Date(s).getTime() + 1000 * 60 * 60 * 24);
+        let s = `2019-02-${Math.floor(Math.random() * 10) + 1} 00:00:00`;
+        let e = new Date(new Date(s).getTime() + 1000 * 60 * 60 * 24);
+        let id = (new Date().getTime() + i * 1000).toString(16);
         let o = {
-            "id": "d924c076f84049bd98b04ce23420d788",
+            id,
             "name": "MO-测订单完成010012-SCW-30-30",
             "from": s,
             "to": e,
-            "color": "-webkit-linear-gradient(left, rgba(59, 92, 248, 1), rgba(59, 92, 248, 0.4))",
-            "moStatusColor": "-webkit-linear-gradient(left, rgba(59, 92, 248, 1), rgba(59, 92, 248, 0.4))",
-            "moAheadDelayColor": "-webkit-linear-gradient(left, rgba(217, 216, 216, 1), rgba(217, 216, 216, 0.4))",
-            "moKitColor": "-webkit-linear-gradient(left, rgba(170, 19, 19, 1), rgba(170, 19, 19, 0.4))",
+            style: {
+                rect: {},
+                text: {},
+            },
+            /* "color": "-webkit-linear-gradient(left, rgba(59, 92, 248, 1), rgba(59, 92, 248, 0.4))",
+             "moStatusColor": "-webkit-linear-gradient(left, rgba(59, 92, 248, 1), rgba(59, 92, 248, 0.4))",
+             "moAheadDelayColor": "-webkit-linear-gradient(left, rgba(217, 216, 216, 1), rgba(217, 216, 216, 0.4))",
+             "moKitColor": "-webkit-linear-gradient(left, rgba(170, 19, 19, 1), rgba(170, 19, 19, 0.4))",*/
             "resCode": "PCY1CY0003",
             "progress": {
                 "percent": 0,
                 "color": "#00CD00"
             },
-            "dependencies": [],
+            "dependencies": [{
+                to: '',
+            }],
             "tempDependencies": [
                 {
                     "to": "abddafc6f4304fd7a308759e2ef50156"
@@ -45,6 +52,14 @@ function f(n) {
                 "MO_QTY": 500,
                 "PROJECT_NUMBER": "测订单完成01.1-1",
                 "STANDARD_FLAG": "Y"
+            },
+            progress: {
+                percent: Math.random(),
+                // fill: 'red',
+            },
+            exception: {
+                warnningFlag: Math.floor(Math.random() * 2) === 0 ? false : true,
+                // fill: 'red',
             },
             "moResCodePriorities": [
                 {
@@ -67,12 +82,13 @@ function f(n) {
     return arr
 }
 
-var tasks = f(3000);
-var ganter = aGanter(Konva);
-var stage = ganter.init({
+
+let tasks = f(3);
+let ganter = aGanter(Konva);
+let stage = ganter.init({
     container: 'container',
-    width: width,
-    height: height,
+    width,
+    height,
     x: .5,
     y: .5
 }, '.srollbox', '.outbox', {lazyLoad: true});
@@ -82,15 +98,15 @@ ganter.setOption(
         timeFormat: '14d',
         diagonal: {
             style: {
-                rect: {stroke: '#000', strokeWidth: 1},
+                rect: {stroke: '#d2d2d2', fill: '#fff', strokeWidth: 1},
             }
         },
         xAxis: {
             x: 100,
             cell: {
                 height: 50, // 宽根据时间格式自动生成
-                rect: {fill: '#c6c6c6', stroke: '#000'},
-                text: {align: 'center'},
+                rect: {/*fill: '#c6c6c6',*/ stroke: '#d2d2d2'},
+                text: {align: 'center', fill: '#999'},
             },
             height: 50,
             /*  customData: [{
@@ -119,11 +135,12 @@ ganter.setOption(
                 width: 100,
                 height: 50,
                 rect: {
-                    fill: '#c6c6c6',
-                    stroke: 'black'
+                    /* fill: '#c6c6c6',*/
+                    stroke: '#d2d2d2'
                 },
                 text: {
-                    padding: 2,
+                    fill: '#999',
+                    padding: 8,
                     align: 'right',
                 },
             },
@@ -205,9 +222,12 @@ ganter.setOption(
             let originCell = this.series[dimension.od].tasks[dimension.td];
             originCell.from = Moment(currentTime).format('YYYY-MM-DD HH:mm:ss');
             originCell.to = Moment(originCell.to).add(offsetTime, 'ms').format('YYYY-MM-DD HH:mm:ss');
-            // originCell.to = new Date(originCell.to.getTime() + offsetTime);
-            /*console.log('originCell.from', originCell.from);
-            console.log('originCell.to', originCell.to);*/
+        },
+        onCellSelect(cell) {
+            console.log(cell);
+        },
+        onYaxisSelect(y) {
+            console.log(y);
         }
     }
 );
@@ -305,6 +325,17 @@ function aGanter(Konva) {
                 'background-color:transparent',
                 'visibility:hidden',
             ].join(';') + ';';
+            return dom;
+        },
+        createTooltip() {
+            let dom = document.createElement('div');
+            let span = document.createElement('span');
+            let content = document.createElement('div');
+            dom.setAttribute('class', 'tooltip');
+            span.setAttribute('class', 'arrow');
+            content.setAttribute('class', 'content');
+            dom.appendChild(span);
+            dom.appendChild(content);
             return dom;
         },
         createLoadDom(params) {
@@ -666,6 +697,7 @@ function aGanter(Konva) {
 
     let store = util.getStore(); //全局存储，专门存储参数和临时变量
     window.store = store;
+    let eventBind;
 
     // AGanter Class
     class AGanter {
@@ -679,11 +711,11 @@ function aGanter(Konva) {
                 y: 0,
             }
         };
+        stage = null;
+        background = null;
+        initX = 0;
 
         constructor() {
-            this.stage = null;
-            this.background = null;
-            this.initX = 0;
         }
 
         //
@@ -693,11 +725,18 @@ function aGanter(Konva) {
             this.outbox = document.querySelector(outId);
             this.initX = params.x;
             this.loadDom = util.createLoadDom({width: params.width, height: params.height});
+            this.tooltip = new Tooltip();
+            this.outbox.appendChild(this.tooltip.dom);
             this.outbox.appendChild(this.loadDom);
+
             store.set('wh', {width: params.width, height: params.height});
             store.set('stage', {stage: this.stage, options});
             store.set('scrollDiv', {scrollDiv: this.scrollDiv});
+            store.set('tooltip', {tooltip: this.tooltip});
             store.set('timeFormat', {status: false});
+            store.set('selectedCells', {});
+
+            eventBind = new Binder();
             return this.stage;
         }
 
@@ -793,7 +832,6 @@ function aGanter(Konva) {
             scrollDiv.addEventListener('scroll', fn);
         }
 
-
         //重新设置舞台宽高
         resetStageWH() {
             let scrollDiv = this.scrollDiv;
@@ -813,6 +851,13 @@ function aGanter(Konva) {
             stage.width(xaxis.dealt.realWidth + xaxis.options.x + 2);
             stage.height(yaxis.dealt.totalHeight + yaxis.options.y + 2);
         }
+
+        // 返回所有选择工单
+        getSeletctedCells() {
+            return store.get('selectedCells');
+        }
+        // 返回Y轴所选
+        getSelectedY(){}
     }
 
     // BACKGROUND Class
@@ -842,7 +887,7 @@ function aGanter(Konva) {
                 stroke: 'transparent',
             },
             line: {
-                stroke: '#000',
+                stroke: '#666',
                 strokeWidth: .5,
             }
         };
@@ -1223,8 +1268,8 @@ function aGanter(Konva) {
                 fontSize: 12,
                 warp: 'none',
                 lineHeight: 1.2,
-                fontFamily:'微软雅黑',
-                fontWeight:'400',
+                fontFamily: '微软雅黑',
+                fontWeight: '400',
             }
         };
 
@@ -1330,16 +1375,38 @@ function aGanter(Konva) {
         static defaultOption = {
             style: {
                 rect: {
-                    fillLinearGradientColorStops: [0, 'rgb(59, 92, 248)', 1, 'rgba(59, 92, 248,0.4)'],
+                    fill: '#b8c2cc',
+                    height: 40,
+                    shadowColor: 'transparent',
+                    // fillLinearGradientColorStops: [0, 'rgb(59, 92, 248)', 1, 'rgba(59, 92, 248,0.4)'],
                 },
                 text: {
                     wrap: 'none',
-                    padding: 5,
+                    // padding: 4,
                     lineHeight: 1.2,
-                    verticalAlign: 'center',
-                    fontFamily:'微软雅黑',
-                    fontWeight:'400',
+                    verticalAlign: 'middle',
+                    fontFamily: '微软雅黑',
+                    fontWeight: '100',
+                    fill: '#f8fbff',
+                    offsetX: -18,
+                    height: 40,
                 },
+                exception: {
+                    width: 6,
+                    fill: '#e76f6f',
+                },
+                progress: {
+                    height: 40,
+                    fill: '#4079d0',
+                },
+                /*progressBg: {
+                    height: 4,
+                    fill: '#b8c2cc',
+                },
+                progress: {
+                    height: 4,
+                    fill: '#42c7df',
+                },*/
             }
         };
 
@@ -1352,6 +1419,8 @@ function aGanter(Konva) {
             let dealtData = this.dealtData;
             let layer = null;
             let options = store.get('options');
+            let xAxis = store.get('xaxis').options;
+            let yAxis = store.get('yaxis').options;
             let stageOffsetX = store.get('xaxis').dealt.stageOffsetX;
             dealtData.forEach((w, i) => {
                 if (i % 500 === 0) {
@@ -1360,8 +1429,8 @@ function aGanter(Konva) {
                     }
                     layer = new Konva.Layer({
                         name: 'workorder',
-                        x: options.xAxis.x,
-                        y: options.yAxis.y,
+                        x: xAxis.x,
+                        y: yAxis.y,
                         stroke: 'red',
                     });
                 }
@@ -1370,24 +1439,30 @@ function aGanter(Konva) {
             this.layers.push(layer);
 
             function drawWO(inf, layer, originOptions) {
-                let options = util.extend(true, {}, WorkOrder.defaultOption.style);
                 let id = inf.id, name = inf.name, x = +inf.x, y = +inf.y, height = inf.height, width = inf.width,
                     originData = inf.originData;
+                let options = util.extend(true, {}, WorkOrder.defaultOption.style, originData.style, {progress: inf.progress}, {exception: inf.exception});
+                let offsetY = Math.floor(-(height - options.rect.height) / 2);
+                let warnningFlag = options.exception.warnningFlag;
+                let tooltip = store.get('tooltip').tooltip;
+                let tween = null;
                 let group = new Konva.Group({
                     id,
                     name,
-                    x,
-                    y,
+                    x: x + .5,
+                    y: y + .5,
                     height,
                     width,
                     draggable: true,
+                    offsetY,
+                    stroke: '#000',
                     dragBoundFunc: function (pos) {
                         let adjustPosX = pos.x + stageOffsetX;
                         let currentTime = util.getX.getNewDate(util.getX.timeFromXaxis(adjustPosX));
                         let offsetTime = util.getX.transformX2Millisecond(pos.x - this.getAbsolutePosition().x);
                         let posy = this.getAbsolutePosition().y;
                         let Ydirection = pos.y > this.getAbsolutePosition().y ? 'down' : 'up';
-                        inf.x = pos.x;
+                        inf.x = adjustPosX - xAxis.x;
 
                         // Text文本变更
                         this.find('Text')[0].text(`${inf.originData.name}\n${Moment(currentTime).format('YYYY-MM-DD HH:mm:ss')} - ${Moment(inf.originData.to).add(offsetTime, 'ms').format('YYYY-MM-DD HH:mm:ss')}`);
@@ -1409,10 +1484,12 @@ function aGanter(Konva) {
                                         break;
                                     }
                                 }
-
                             }
                         }
-
+                        tooltip.positionUpdate({
+                            x: inf.x + xAxis.x - store.get('scrollDiv').scrollDiv.scrollLeft,
+                            y: posy + height - offsetY - store.get('scrollDiv').scrollDiv.scrollTop
+                        });
                         // 表格元素拖动回调
                         if (originOptions.onCellDraw) {
                             originOptions.onCellDraw(inf, currentTime, offsetTime);
@@ -1422,24 +1499,85 @@ function aGanter(Konva) {
                             x: pos.x,
                             y: posy,
                         };
-                    }
+                    },
                 });
+
                 let rect = new Konva.Rect({
+                    id: 'bg',
                     height,
                     width,
-                    fillLinearGradientStartPoint: {x: 0, y: 0},
-                    fillLinearGradientEndPoint: {x: width, y: 0},
+                    // fillLinearGradientStartPoint: {x: 0, y: 0},
+                    // fillLinearGradientEndPoint: {x: width, y: 0},
                     ...options.rect,
                 });
                 let text = new Konva.Text({
                     height,
-                    width,
+                    width: width + options.text.offsetX,
                     text: `${inf.originData.name}\n${inf.originData.from} - ${inf.originData.to}`,
                     ...options.text,
                 });
+                /* let progressBg = new Konva.Rect({
+                     height: options.progressBg.height,
+                     fill: options.progressBg.fill,
+                     width,
+                     y: rect.height() - options.progressBg.height,
+                 });*/
+                let progress = new Konva.Rect({
+                    height,
+                    fill: options.progress.fill,
+                    width: width * options.progress.percent,
+                    ...options.progress,
+                    // y: progressBg.y(),
+                });
+
                 group.add(rect);
+                group.add(progress);
+                //例外
+                if (warnningFlag) {
+                    let exception = new Konva.Rect({
+                        fill: options.exception.fill,
+                        width: options.exception.width,
+                        height: rect.height(),
+                    });
+                    group.add(exception);
+                    rect.x(options.exception.width);
+                    rect.width(rect.width() - options.exception.width);
+                    progress.x(options.exception.width);
+                    progress.width(rect.width() * options.progress.percent);
+                }
+
+                // group.add(progressBg);
                 group.add(text);
                 layer.add(group);
+
+                // 事件绑定
+                tween = new Tween(group.find('Rect')[0]);
+                eventBind.bind(group, {
+                    mouseenter: (evt, flag) => {
+                        if (flag.click === false) tween.start();
+                        let pos = {
+                            x: inf.x - store.get('scrollDiv').scrollDiv.scrollLeft + xAxis.x,
+                            y: inf.y + height - offsetY + yAxis.y - store.get('scrollDiv').scrollDiv.scrollTop,
+                        };
+                        tooltip.show();
+                        tooltip.positionUpdate(pos);
+                        tooltip.contentUpdate(originData.taskTooltipsContent);
+                    },
+                    mouseleave: (evt, flag) => {
+                        if (flag.click === false) {
+                            if (tween) tween.end();
+                        }
+                        tooltip.hide();
+                    },
+                    click: (evt, flag) => {
+                        flag.click = !flag.click;
+                        if (flag.click === true) {
+                            store.set('selectedCells', {[inf.id]: inf});
+                        } else {
+                            delete store.get('selectedCells')[inf.id];
+                        }
+                    }
+                }, {click: false});
             }
         }
 
@@ -1470,13 +1608,115 @@ function aGanter(Konva) {
                         width,
                         height: yaxis.cell.height,
                         originData: task,
-                        dimension: {od, td}
+                        dimension: {od, td}, //在原始数组所处的维度
+                        exception: task.exception, //例外
+                        progress: task.progress, //完成百分比
                     };
                     dealtWOData.push(handbill);
                 })
             });
 
             return dealtWOData;
+        }
+    }
+
+    // Tooltip
+    class Tooltip {
+        constructor() {
+            this.dom = util.createTooltip();
+            this.showStatus = false;
+        }
+
+        show() {
+            if (this.showStatus === false) {
+                this.dom.style.display = 'block';
+                this.showStatus = true;
+            }
+        }
+
+        hide() {
+            if (this.showStatus === true) {
+                this.dom.style.display = 'none';
+                this.showStatus = false;
+            }
+        }
+
+        positionUpdate(pos) {
+            if (pos.x) {
+                this.dom.style.left = `${pos.x}px`;
+            }
+            if (pos.y) {
+                this.dom.style.top = `${pos.y}px`;
+            }
+        }
+
+        contentUpdate(val) {
+            let titleStr = {
+                MAKE_ORDER_NUM: '工单编号',
+                ITEM_CODE: '物料编号',
+                DESCRIPTIONS_CN: '物料描述',
+                DEMAND_DATE: '需求时间',
+                MO_QTY: '需求数量',
+            };
+            let options = store.get('options');
+            if (options.tooltip && util.isFunction(options.tooltip)) {
+                options.tooltip(val, this.dom);
+            } else {
+                let htmlString = '';
+                for (let name in val) {
+                    if (name === 'STANDARD_FLAG' || name === 'PROJECT_NUMBER') {
+                        continue;
+                    }
+                    htmlString += `<span>${titleStr[name]}：</span>${val[name]}</br>`;
+                }
+                this.dom.lastChild.innerHTML = htmlString;
+            }
+        }
+    }
+
+    // Tween
+    class Tween {
+        constructor(node) {
+            this.node = node;
+            this.tween = new Konva.Tween({
+                node,
+                duration: 0.1,
+                easing: Konva.Easings.ElasticEaseOut,
+                shadowOffsetX: 4,
+                shadowOffsetY: 4,
+                shadowBlur: 2,
+                shadowColor: '#000929',
+                shadowOpacity: .3,
+            })
+        }
+
+        start() {
+            this.tween.play();
+        }
+
+        end() {
+            let node = this.node;
+            if (this.tween) {
+                this.tween.reverse();
+            }
+            // node.shadowColor('transparent');
+        }
+    }
+
+    // 事件绑定
+    class Binder {
+        constructor() {
+            this.events = {};
+        }
+
+        bind(eventSource, events, flag) {
+            if (util.isObject(events)) {
+                let keys = Object.keys(events);
+                keys.forEach(key => {
+                    let fn = evt => events[key](evt, flag);
+                    eventSource.on(key, fn);
+                })
+            }
         }
     }
 
