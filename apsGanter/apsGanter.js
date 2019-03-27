@@ -1,5 +1,9 @@
 import Konva from 'konva';
 import Moment from 'moment';
+import Mutation, {odf} from './observer/Mutation';
+import Observer from './observer/Observer';
+import Subject from './observer/Subject';
+
 
 let srollbox = document.querySelector('.srollbox');
 let d1 = document.querySelector('#d1');
@@ -10,15 +14,29 @@ let d30 = document.querySelector('#d30');
 let width = srollbox.offsetWidth;
 let height = srollbox.offsetHeight;
 
-function f(n) {
+function f(s, n) {
     let arr = [];
-    for (let i = 0; i < n; i++) {
+    for (let i = s; i < n; i++) {
         let s = `2019-02-${Math.floor(Math.random() * 10) + 1} 00:00:00`;
         let e = new Date(new Date(s).getTime() + 1000 * 60 * 60 * 24);
-        let id = (new Date().getTime() + i * 1000).toString(16);
+        // let id = (new Date().getTime() + i * 1000).toString(16);
+        let id = i + '';
+        let pl;
+        switch (true) {
+            case i < 4:
+                pl = 1;
+                break;
+            case i < 9:
+                pl = 2;
+                break;
+            default:
+                pl = 6;
+                break;
+        }
         let o = {
             id,
             "name": "MO-测订单完成010012-SCW-30-30",
+            productLine: `PZZ1KX000${pl}`,
             "from": s,
             "to": e,
             style: {
@@ -35,7 +53,7 @@ function f(n) {
                 "color": "#00CD00"
             },
             "dependencies": [{
-                to: '',
+                to: Math.floor(Math.random() * 15) + '',
             }],
             "tempDependencies": [
                 {
@@ -63,16 +81,16 @@ function f(n) {
             },
             "moResCodePriorities": [
                 {
-                    "Key": "PZZ1KX0001",
-                    "Value": (Math.random() * 10)
+                    "key": "PZZ1KX0001",
+                    "value": (Math.random() * 10)
                 },
                 {
-                    "Key": "PZZ1KX0004",
-                    "Value": (Math.random() * 10)
+                    "key": "PZZ1KX0004",
+                    "value": (Math.random() * 10)
                 },
                 {
-                    "Key": "PZZ1KX0005",
-                    "Value": (Math.random() * 10)
+                    "key": "PZZ1KX0005",
+                    "value": (Math.random() * 10)
                 },
             ],
             "visible": true,
@@ -82,9 +100,11 @@ function f(n) {
     return arr
 }
 
-
-let tasks = f(3);
+let tasks = f(0, 3);
+let tasks1 = f(4, 8);
+let tasks2 = f(9, 15);
 let ganter = aGanter(Konva);
+window.ganter = ganter;
 let stage = ganter.init({
     container: 'container',
     width,
@@ -199,30 +219,35 @@ ganter.setOption(
             ]
             // data:['PZZ1L001', 'PZZ1LX002','PZZ1LX003','PZZ1LX004','PZZ1LX005','PZZ1LX006']//简易模式
         },
+        // 工单元数据
         series:
             [
                 {
                     belong: '总装01-M23',
-                    name: 'PZZ1KX0001',
                     tasks: tasks,
                 },
                 {
                     belong: '总装01-M23',
-                    name: 'PZZ1KX0002',
-                    tasks: tasks,
+                    tasks: tasks1,
                 },
                 {
                     belong: '总装01-M24',
-                    name: 'PZZ1KX0006',
-                    tasks: tasks,
+                    tasks: tasks2,
                 }
             ],
-        onCellDraw(cell, currentTime, offsetTime) {
-            let dimension = cell.dimension;
-            let originCell = this.series[dimension.od].tasks[dimension.td];
-            originCell.from = Moment(currentTime).format('YYYY-MM-DD HH:mm:ss');
-            originCell.to = Moment(originCell.to).add(offsetTime, 'ms').format('YYYY-MM-DD HH:mm:ss');
+        /**
+         * 工单拖动回调
+         * @param cell 工单信息
+         * @param currentTime 当前时间
+         * @param offsetTime 偏离时间
+         */
+        onCellDrag(cell, currentTime, offsetTime) {
+
         },
+        /**
+         * 工单选中回调
+         * @param cell 工单信息
+         */
         onCellSelect(cell) {
             console.log(cell);
         },
@@ -248,7 +273,6 @@ d3.addEventListener('click', function () {
 d1.addEventListener('click', function () {
     ganter.setTimeFormat('1d');
 })
-
 
 function aGanter(Konva) {
     var toString = Object.prototype.toString;
@@ -567,8 +591,8 @@ function aGanter(Konva) {
                 }
 
                 var storeMethod = {
-                    set: function (name, value) {
-                        if (this[name] && (util.isArray(value) || util.isObject(value))) {
+                    set: function (name, value, referModel = false) {
+                        if (!referModel && this[name] && (util.isArray(value) || util.isObject(value))) {
                             this[name] = util.extend(true, {}, this[name], value);
                         } else {
                             this[name] = value;
@@ -692,12 +716,47 @@ function aGanter(Konva) {
             childClass.$superclass = parentClass;
 
             return childClass;
-        }
+        },
+        // 随机获取颜色
+        getColor: function () {
+            let c = [];
+            let i = 0;
+            let rgb = ['r', 'g', 'b'];
+            let resetColor = 'null';
+            let r = Math.floor(Math.random() * 256);
+            let g = Math.floor(Math.random() * 256);
+            let b = Math.floor(Math.random() * 256);
+
+            // filter light color;
+            if (r > 200) i++;
+            if (g > 200) i++;
+            if (b > 200) i++;
+            if (i === 3) {
+                resetColor = rgb[Math.floor(Math.random() * 4)];
+            }
+            switch (resetColor) {
+                case 'r':
+                    r = 0;
+                    break;
+                case 'g':
+                    g = 0;
+                    break;
+                case 'b':
+                    b = 0;
+                    break;
+            }
+
+            c.push(r);
+            c.push(g);
+            c.push(b);
+            return 'rgba(' + c.join() + ', .6)';
+        },
+        // 观察者
     };
 
     let store = util.getStore(); //全局存储，专门存储参数和临时变量
     window.store = store;
-    let eventBind;
+    let eventBind, drawLiner;
 
     // AGanter Class
     class AGanter {
@@ -713,9 +772,25 @@ function aGanter(Konva) {
         };
         stage = null;
         background = null;
+        mutation = null;
         initX = 0;
 
         constructor() {
+            const self = this;
+            const observer = new Observer();
+            observer.setUpdate(function () {
+                console.log(self.getSeletctedCells());
+            });
+            const subject = new Subject();
+
+            // set observer and subject
+            Object.defineProperties(this, {
+                '$ob': {value: observer, enumerable: false, writable: true, configurable: true},
+                '$sub': {value: subject, enumerable: false, writable: true, configurable: true}
+            });
+            // construct Mutation
+            this.mutation = new Mutation();
+
         }
 
         //
@@ -736,15 +811,33 @@ function aGanter(Konva) {
             store.set('timeFormat', {status: false});
             store.set('selectedCells', {});
 
-            eventBind = new Binder();
             return this.stage;
         }
 
         setOption(option) {
             // 默认配置
             let options = util.extend(true, {}, AGanter.defaultOption, option);
+            let series = option.series;
             util.getX.xaxisX = options.xAxis.x || 0;
             store.set('options', options);
+            store.set('series', series);
+
+            // mutation series
+            if (option.series) {
+                const seriesObserver = new Observer(series);
+                // define update
+                seriesObserver.setUpdate(function (cell, currentTime, offsetTime) {
+                    let dimension = cell.dimension;
+                    let originCell = this[dimension.od].tasks[dimension.td];
+                    originCell.from = Moment(currentTime).format('YYYY-MM-DD HH:mm:ss');
+                    originCell.to = Moment(originCell.to).add(offsetTime, 'ms').format('YYYY-MM-DD HH:mm:ss');
+                    originCell.productLine = cell.productLine;
+                });
+                odf(series, '$ob', {value: seriesObserver, enumerable: false, writable: true, configurable: true});
+                this.mutation.mutate(series);
+                series.$sub.registerObserver(this);
+                this.$sub.registerObserver(series);
+            }
         }
 
         render() {
@@ -755,15 +848,19 @@ function aGanter(Konva) {
         draw() {
             store.clear('xaxis');
             store.clear('yaxis');
-            let options = store.get('options', options);
+            let options = store.get('options');
+            let series = store.get('series');
             let backgroundGrid = this.backgroundGrid = new BackgroundGrid({
                 id: 'backgroundGrid',
                 x: options.xAxis.x,
                 y: options.yAxis.y
             });
             let background = this.background = new Background('background');
-            let workorder = this.workorder = new WorkOrder(options.series);
+            let workorder = this.workorder = new WorkOrder(series, this);
             let stage = this.stage;
+
+            eventBind = new Binder();
+            drawLiner = new DrawLiner('dependencies');
 
             // 开始绘画
             background.draw();
@@ -775,6 +872,7 @@ function aGanter(Konva) {
             if (workorder.layers[0] !== null) {
                 stage.add(...workorder.layers);
             }
+            stage.add(drawLiner.layer);
             stage.add(background.layer);
             this.resetStageWH();
         }
@@ -799,6 +897,7 @@ function aGanter(Konva) {
             let self = this;
             let scrollDiv = this.scrollDiv;
             let screenWidth = store.get('wh').width;
+            let tid;
             let fn = function (evt) {
                 let dx = this.scrollLeft;
                 let dy = this.scrollTop;
@@ -821,12 +920,15 @@ function aGanter(Konva) {
                 if ((dx + screenWidth > xaxisDealt.preLoadRang.endX && xaxisDealt.preLoadRang.endX < xaxisDealt.totalWidth) || (dx < xaxisDealt.preLoadRang.startX && xaxisDealt.preLoadRang.startX !== 0)) {
                     self.loadDom.style.display = 'block';
                     self.scrollDiv.style.overflow = 'hidden';
-                    setTimeout(function () {
+                    if (tid) {
+                        clearTimeout(tid);
+                    }
+                    tid = setTimeout(function () {
                         self.reset();
                         self.draw();
                         self.loadDom.style.display = 'none';
                         self.scrollDiv.style.overflow = 'auto';
-                    })
+                    }, 100)
                 }
             }, 100);
             scrollDiv.addEventListener('scroll', fn);
@@ -856,8 +958,10 @@ function aGanter(Konva) {
         getSeletctedCells() {
             return store.get('selectedCells');
         }
+
         // 返回Y轴所选
-        getSelectedY(){}
+        getSelectedY() {
+        }
     }
 
     // BACKGROUND Class
@@ -1410,14 +1514,17 @@ function aGanter(Konva) {
             }
         };
 
-        constructor(data) {
+        constructor(data, gantt) {
+            this.gantt = gantt;
             this.layers = [];
             this.dealtData = this.dealWithData(data);
+            store.set('workOrder', {dealtData: this.dealtData}, true); // 引用模式存储workorderDealtData
         }
 
         draw() {
             let dealtData = this.dealtData;
             let layer = null;
+            let self = this;
             let options = store.get('options');
             let xAxis = store.get('xaxis').options;
             let yAxis = store.get('yaxis').options;
@@ -1431,7 +1538,6 @@ function aGanter(Konva) {
                         name: 'workorder',
                         x: xAxis.x,
                         y: yAxis.y,
-                        stroke: 'red',
                     });
                 }
                 drawWO(w, layer, options);
@@ -1461,40 +1567,53 @@ function aGanter(Konva) {
                         let currentTime = util.getX.getNewDate(util.getX.timeFromXaxis(adjustPosX));
                         let offsetTime = util.getX.transformX2Millisecond(pos.x - this.getAbsolutePosition().x);
                         let posy = this.getAbsolutePosition().y;
-                        let Ydirection = pos.y > this.getAbsolutePosition().y ? 'down' : 'up';
+                        let Ydirection = 'none';
+                        if (pos.y > this.getAbsolutePosition().y) {
+                            Ydirection = 'down';
+                        } else if (pos.y < this.getAbsolutePosition().y) {
+                            Ydirection = 'up';
+                        }
                         inf.x = adjustPosX - xAxis.x;
-
                         // Text文本变更
                         this.find('Text')[0].text(`${inf.originData.name}\n${Moment(currentTime).format('YYYY-MM-DD HH:mm:ss')} - ${Moment(inf.originData.to).add(offsetTime, 'ms').format('YYYY-MM-DD HH:mm:ss')}`);
                         // Y轴拖动
                         if (originData.moResCodePriorities) {
                             let mm = originData.moResCodePriorities;
                             for (let m = 0, ml = mm.length; m < ml; m++) {
-                                let keyHeight = util.yMap.getY(mm[m].Key);
+                                let keyHeight = util.yMap.getY(mm[m].key);
                                 if (Ydirection === 'up') {
                                     if (pos.y > keyHeight && pos.y < keyHeight + height) {
                                         posy = keyHeight + height;
                                         inf.y = keyHeight;
+                                        inf.productLine = mm[m].key;
                                         break;
                                     }
                                 } else if (Ydirection === 'down') {
                                     if (pos.y > keyHeight + height && pos.y < keyHeight + height * 2) {
                                         posy = keyHeight + height;
                                         inf.y = keyHeight;
+                                        inf.productLine = mm[m].key;
                                         break;
                                     }
                                 }
                             }
                         }
+                        // tooltip set position
                         tooltip.positionUpdate({
                             x: inf.x + xAxis.x - store.get('scrollDiv').scrollDiv.scrollLeft,
                             y: posy + height - offsetY - store.get('scrollDiv').scrollDiv.scrollTop
                         });
-                        // 表格元素拖动回调
-                        if (originOptions.onCellDraw) {
-                            originOptions.onCellDraw(inf, currentTime, offsetTime);
-                        }
 
+                        // 表格元素拖动回调
+                        self.gantt.$sub.notifyObserver(inf, currentTime, offsetTime);
+
+                        // drag callback
+                        if (originOptions.onCellDrag) {
+                            originOptions.onCellDrag(inf, currentTime, offsetTime);
+                        }
+                        if (drawLiner.isDraw) {
+                            drawLiner.draw(inf);
+                        }
                         return {
                             x: pos.x,
                             y: posy,
@@ -1555,25 +1674,32 @@ function aGanter(Konva) {
                 eventBind.bind(group, {
                     mouseenter: (evt, flag) => {
                         if (flag.click === false) tween.start();
+                        let scrollDiv = store.get('scrollDiv').scrollDiv;
                         let pos = {
-                            x: inf.x - store.get('scrollDiv').scrollDiv.scrollLeft + xAxis.x,
+                            x: inf.x - scrollDiv.scrollLeft + xAxis.x,
                             y: inf.y + height - offsetY + yAxis.y - store.get('scrollDiv').scrollDiv.scrollTop,
                         };
                         tooltip.show();
                         tooltip.positionUpdate(pos);
                         tooltip.contentUpdate(originData.taskTooltipsContent);
+                        scrollDiv.style.cursor = 'pointer';
                     },
                     mouseleave: (evt, flag) => {
                         if (flag.click === false) {
                             if (tween) tween.end();
                         }
+                        let scrollDiv = store.get('scrollDiv').scrollDiv;
+                        scrollDiv.style.cursor = 'default';
                         tooltip.hide();
                     },
                     click: (evt, flag) => {
                         flag.click = !flag.click;
                         if (flag.click === true) {
                             store.set('selectedCells', {[inf.id]: inf});
+                            // 显示工单依赖
+                            drawLiner.draw(inf);
                         } else {
+                            drawLiner.clear();
                             delete store.get('selectedCells')[inf.id];
                         }
                     }
@@ -1591,9 +1717,9 @@ function aGanter(Konva) {
             let isLazyLoad = store.get('stage').options.lazyLoad; //判断是否懒加载模式
             originData.forEach((order, od) => {
                 let tasks = order.tasks;
-                let y = util.yMap.getY(order.name);
                 let belong = order.belong;
                 tasks.forEach((task, td) => {
+                    let y = util.yMap.getY(task.productLine);
                     let from = getx.fromTime(task.from);
                     let width = getx.getWidth(task.from, task.to);
                     let to = from + width;
@@ -1603,6 +1729,7 @@ function aGanter(Konva) {
                     let handbill = {
                         id: task.id,
                         name: `${task.flag} ${belong}`,
+                        productLine: task.productLine,
                         y: y,
                         x: from,
                         width,
@@ -1718,6 +1845,145 @@ function aGanter(Konva) {
                 })
             }
         }
+    }
+
+    class DrawLiner {
+        static cellWidth = store.get('cellWidth');
+        pathWorkOrderMapper = []; // 存放路径包含的工单，路径序列对应pathPaintsInf的路径序列
+
+        constructor(id) {
+            let x = store.get('xaxis').options.x;
+            let y = store.get('yaxis').options.y;
+            this.isDraw = false; //是否已经绘画了依赖路径
+            this.layer = new Konva.Layer({
+                id,
+                x,
+                y,
+            });
+        }
+
+        draw(workerOrder) {
+            this.clear();
+            let pathDep = [];
+            pathDep.push(workerOrder.id);
+            let pathDependencies = this.sourceDependencies(workerOrder, pathDep);
+            this.pathWorkOrderMapper = [];
+            this.pathWorkOrderMapper.push(pathDependencies);
+            this.isDraw = true;
+        }
+
+        // 清理工单依赖
+        clear() {
+            this.layer.clear();
+            this.isDraw = false;
+        }
+
+        drawLine(points, randomColor = false) {
+            let layer = this.layer;
+            let arrowPoints = points.splice(-2);
+            let color = randomColor ? util.getColor() : '#929292';
+            let line = new Konva.Line({
+                stroke: color,
+                points,
+                strokeWidth: 3
+            });
+            let arrow = new Konva.Arrow({
+                points: arrowPoints,
+                fill: color,
+                pointerLength: 8,
+                pointerWidth: 8,
+            });
+            layer.add(line);
+            layer.add(arrow);
+            line.draw();
+            arrow.draw();
+        }
+
+        /**
+         * 寻找工单依赖
+         *
+         * @param 传入工单，自动递归寻找整条依赖
+         */
+        sourceDependencies(workerOrder, pathDep) {
+            let dealtData = store.get('workOrder').dealtData;
+            let fromWorkOrderData = dealtData.find(d => d.id === workerOrder.id);
+            if (workerOrder.originData.dependencies) {
+                let dependencies = workerOrder.originData.dependencies;
+                if (dependencies.length < 1) return;
+                let l = dependencies.length;
+                for (let i = 0; i < l; i++) {
+                    let toWorkOrderData = dealtData.find(d => d.id === dependencies[i].to);
+                    if (toWorkOrderData === undefined || ~pathDep.indexOf(toWorkOrderData.id)) continue;
+                    pathDep.push(toWorkOrderData.id); // 记录工单id
+                    // 寻点，返回路径详细信息
+                    let path = this.sourcePoint(fromWorkOrderData, toWorkOrderData);
+                    this.drawLine(path, true);
+                    this.sourceDependencies(toWorkOrderData, pathDep);
+                }
+            }
+            return pathDep;
+        }
+
+        /**
+         * 寻路径位置
+         *
+         * @param formWorkOrder
+         * @param toWorkOrder
+         * @return [x,y,x1,y1] 工单依赖的路径信息
+         */
+        sourcePoint(fromWorkOrder, toWorkOrder) {
+            let f = {x: fromWorkOrder.x, y: fromWorkOrder.y, w: fromWorkOrder.width, h: fromWorkOrder.height};
+            let t = {x: toWorkOrder.x, y: toWorkOrder.y, w: toWorkOrder.width, h: toWorkOrder.height};
+            let direction = 'none'; // to的工单相对from工单的位置
+            let paths = [];
+            let cw = 8;
+            if (f.x < t.x) {
+                direction = 'right';
+            } else {
+                direction = 'left';
+            }
+
+            if (direction === 'right') {
+                // 前两点
+                paths = paths.concat(firstTwoPoint(f, t));
+                //中间点
+                paths.push(f.x + f.w + cw, t.y + t.h);
+                paths.push(t.x - cw * 2, t.y + t.h);
+                // 后3点
+                paths = paths.concat(lastTwoPoint(f, t));
+            } else if (direction === 'left') {
+                // 前两点
+                paths = paths.concat(firstTwoPoint(f, t));
+                // 中间点
+                paths.push(f.x + f.w + cw, t.y + t.h);
+                paths.push(t.x - cw * 2, t.y + t.h);
+                // 后3点
+                paths = paths.concat(lastTwoPoint(f, t));
+            }
+
+
+            // 通用点
+            // 前2点
+            function firstTwoPoint(f, t, cw = 8) {
+                let path = [];
+                path.push(f.x + f.w, f.y + Math.floor(f.h / 2));
+                path.push(f.x + f.w + cw, f.y + Math.floor(f.h / 2));
+                return path;
+            }
+
+            // 后3点
+            function lastTwoPoint(f, t, cw = 8) {
+                let path = [];
+                path.push(t.x - cw * 2, t.y + Math.floor(t.h / 2));
+                path.push(t.x - cw, t.y + Math.floor(t.h / 2));
+                path.push(t.x, t.y + Math.floor(t.h / 2));
+                return path;
+            }
+
+            return paths;
+
+        }
+
     }
 
     return new AGanter();

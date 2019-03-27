@@ -8,10 +8,45 @@
         .outbox{
             position: relative;
         }
+        .tooltip{
+            position:absolute;
+            border-radius:4px;
+            background-color:#fff;
+            border:1px solid #dcdcdc;
+            display:none;
+            font-size: 12px;
+            line-height: 18px;
+            color: #666;
+            padding: 16px;
+            box-shadow: 2px 2px 8px rgba(135,135,135,.2);
+        }
+        .tooltip span.arrow{
+            position: absolute;
+            border: 8px solid transparent;
+            border-bottom-color: #dcdcdc;
+            width: 0;
+            height: 0;
+            bottom: 100%;
+            left: 16px;
+            display: block;
+        }
+        .tooltip:after{
+            content: ' ';
+            display: block;
+            width: 0;
+            height: 0;
+            position: absolute;
+            top: -15px;
+            left: 16px;
+            border: 8px solid transparent;
+            border-bottom-color: #fff;
+        }
         .srollbox{
             width:  1200px;
             height: 300px;
             overflow: auto;
+            color: #13698B;
+            background-color: rgb(249, 249, 249);
         }
         @keyframes spin{
             from {
